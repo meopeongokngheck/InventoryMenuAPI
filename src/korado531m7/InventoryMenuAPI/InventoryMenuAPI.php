@@ -10,8 +10,8 @@ use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIds;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\JsonNbtParser;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\plugin\PluginBase;
@@ -55,7 +55,9 @@ class InventoryMenuAPI extends PluginBase{
                 $nbt = TileFurnace::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
                 $nbt->setString('CustomName',$inventoryName);
                 $tile = Tile::createTile(Tile::FURNACE, $player->getLevel(), $nbt);
-                $tag = JsonNbtParser::parseJSON(json_encode(['id' => $tile->getSaveId(), 'CustomName' => $inventoryName],JSON_UNESCAPED_UNICODE));
+				$tag = new CompoundTag();
+				$tag->setString('id', $tile->getSaveId());
+				$tag->setString('CustomName', $inventoryName);
             break;
             
             case self::INVENTORY_TYPE_DOUBLE_CHEST:
@@ -63,7 +65,12 @@ class InventoryMenuAPI extends PluginBase{
                 $nbt2 = TileChest::createNBT(new Vector3($x,$y,$z + 1), 0, Item::get(0,0), $player);
                 $tile2 = Tile::createTile(Tile::CHEST, $player->getLevel(), $nbt2);
                 $writer = new NetworkLittleEndianNBTStream();
-                $tag = JsonNbtParser::parseJSON(json_encode(['id' => $tile2->getSaveId(), 'CustomName' => $inventoryName, 'pairx' => $x, 'pairz' => $z],JSON_UNESCAPED_UNICODE));
+				$tag = new CompoundTag();
+				$tag->setString('id', $tile->getSaveId());
+				$tag->setInt('pairx', $x);
+				$tag->setInt('pairz', $z);
+				$tag->setString('CustomName', $inventoryName);
+				
                 $pk = new BlockEntityDataPacket;
                 $pk->x = $x;
                 $pk->y = $y;
@@ -75,8 +82,9 @@ class InventoryMenuAPI extends PluginBase{
                 $nbt = TileChest::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
                 $nbt->setString('CustomName',$inventoryName);
                 $tile = Tile::createTile(Tile::CHEST, $player->getLevel(), $nbt);
-                $tag = JsonNbtParser::parseJSON(json_encode(['id' => $tile->getSaveId(), 'CustomName' => $inventoryName],JSON_UNESCAPED_UNICODE));
-                
+                $tag = new CompoundTag();
+				$tag->setString('id', $tile->getSaveId());
+				$tag->setString('CustomName', $inventoryName);
                 if($inventoryType == self::INVENTORY_TYPE_DOUBLE_CHEST) $tile->pairWith($tile2);
             break;
         }
