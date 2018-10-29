@@ -1,8 +1,8 @@
 <?php
 namespace korado531m7\InventoryMenuAPI;
 
-use korado531m7\event\InventoryMenuCloseEvent;
-use korado531m7\event\InventoryMenuGenerateEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 use korado531m7\task\DelayAddWindowTask;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -93,8 +93,7 @@ class InventoryMenuAPI extends PluginBase{
         foreach($items as $itemkey => $item){
             $inv->setItem($itemkey,$item);
         }
-        $ev = new InventoryMenuGenerateEvent($player,$items,$tile,$inventoryType);
-        $ev->call();
+		Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuGenerateEvent($player,$items,$tile,$inventoryType));
         self::saveInventory($player);
         switch($inventoryType){
             case self::INVENTORY_TYPE_FURNACE:
@@ -121,7 +120,7 @@ class InventoryMenuAPI extends PluginBase{
     public static function fillInventoryMenu(Player $player,array $items,bool $isCloseType = false){
         if(!self::isOpeningInventoryMenu($player)) return false;
         $data = self::getData($player);
-        $tile = self::getPluginBase()->getServer()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
+        $tile = Server::getInstance()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
         if($tile === \null) return false;
         $inv = $tile->getInventory();
         $inv->clearAll();
@@ -142,7 +141,7 @@ class InventoryMenuAPI extends PluginBase{
     public static function clearInventoryMenu(Player $player,bool $isCloseType = false){
         if(!self::isOpeningInventoryMenu($player)) return false;
         $data = self::getData($player);
-        $tile = self::getPluginBase()->getServer()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
+        $tile = Server::getInstance()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
         if($tile === \null) return false;
         $inv = $tile->getInventory();
         $inv->clearAll();
@@ -158,10 +157,9 @@ class InventoryMenuAPI extends PluginBase{
     public static function closeInventoryMenu(Player $player){
         if(!self::isOpeningInventoryMenu($player)) return true;
         $data = self::getData($player);
-        if(self::getPluginBase()->getServer()->isLevelLoaded($data[5])){
-            $level = self::getPluginBase()->getServer()->getLevelByName($data[5]);
-            $ev = new InventoryMenuCloseEvent($player, $level->getTile(new Vector3($data[2],$data[3],$data[4])));
-            $ev->call();
+        if(Server::getInstance()->isLevelLoaded($data[5])){
+            $level = Server::getInstance()->getLevelByName($data[5]);
+            Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuCloseEvent($player, $level->getTile(new Vector3($data[2],$data[3],$data[4]))));
             switch($data[0]){
                 case self::INVENTORY_TYPE_DOUBLE_CHEST:
                     self::sendFakeBlock($player,$data[2],$data[3],$data[4] + 1,BlockIds::AIR);
@@ -219,6 +217,7 @@ class InventoryMenuAPI extends PluginBase{
         $pk->x = $x;
         $pk->y = $y;
         $pk->z = $z;
+		$pk->flags = UpdateBlockPacket::FLAG_ALL;
         $pk->blockRuntimeId = BlockFactory::toStaticRuntimeId($blockid);
         $player->dataPacket($pk);
     }

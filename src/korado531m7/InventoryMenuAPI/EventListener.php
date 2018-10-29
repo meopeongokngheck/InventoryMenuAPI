@@ -1,8 +1,9 @@
 <?php
 namespace korado531m7\InventoryMenuAPI;
 
-use korado531m7\event\InventoryMenuClickEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
 use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\event\Listener;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
@@ -39,8 +40,7 @@ class EventListener implements Listener{
                     $data = $this->plugin->getData($player);
                     $itemresult = $action->oldItem;
                     if($action->oldItem->getId() == 0) $itemresult = $action->newItem;
-                    $ev = new InventoryMenuClickEvent($player, $itemresult, $player->getLevel()->getTile(new Vector3($data[2],$data[3],$data[4])));
-                    $ev->call();
+					Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuClickEvent($player, $itemresult, $player->getLevel()->getTile(new Vector3($data[2],$data[3],$data[4]))));
                     if($data[6] == true) $this->plugin->closeInventoryMenu($player);
                 }
             break;
