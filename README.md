@@ -1,14 +1,14 @@
 # InventoryMenuAPI
 **You can create inventory menu like java version with this API!**
 
-### Instllation
+### Installation
 You can download converted to phar version file from [here](https://poggit.pmmp.io/ci/korado531m7/InventoryMenuAPI/InventoryMenuAPI)
 
 ### How to use
 First, you need to write use
 ```php
 <?php
-use korado531m7\InventoryMenuAPI;
+use korado531m7\InventoryMenuAPI\InventoryMenuAPI;
 ```
 
 Second, you need to define an array that include items like
@@ -87,7 +87,7 @@ You can an event when player clicked items
 it's InventoryMenuClickEvent
 here's the documentation
 ```php
-use korado531m7\event\InventoryMenuClickEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
 ```
 `getPlayer()`       - Return Player object who clicked
 
@@ -101,7 +101,7 @@ use korado531m7\event\InventoryMenuClickEvent;
 
 **ON CLOSED INVENTORY MENU**
 ```php
-use korado531m7\event\InventoryMenuCloseEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
 ```
 `getPlayer()`       - Return Player object who clicked
 
@@ -111,7 +111,7 @@ use korado531m7\event\InventoryMenuCloseEvent;
 
 **ON GENERATED INVENTORY MENU**
 ```php
-use korado531m7\event\InventoryMenuGenerateEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 ```
 `getPlayer()`        - Return Player object who clicked
 
