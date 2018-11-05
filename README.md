@@ -42,30 +42,22 @@ Wow its easy!
 To change inventory type, need to place type int to fourth parameter from supported type (Default: chest)
 ```php
 //Supported list
-const INVENTORY_TYPE_CHEST = 1;const INVENTORY_TYPE_DOUBLE_CHEST = 2;const INVENTORY_TYPE_ENCHANTING_TABLE = 3;const INVENTORY_TYPE_HOPPER = 4;const INVENTORY_TYPE_BREWING_STAND = 5;
+const INVENTORY_TYPE_CHEST = 1;const INVENTORY_TYPE_DOUBLE_CHEST = 2;const INVENTORY_TYPE_ENCHANTING_TABLE = 3;const INVENTORY_TYPE_HOPPER = 4;const INVENTORY_TYPE_BREWING_STAND = 5;const INVENTORY_TYPE_ANVIL = 6;const INVENTORY_TYPE_DISPENSER = 7;const INVENTORY_TYPE_DROPPER = 8;const INVENTORY_TYPE_BEACON = 9;const INVENTORY_TYPE_TRADING = 10;
+const INVENTORY_TYPE_COMMAND_BLOCK = 11;
+NOTICE: Trading and command block is not supported (not implemented on PocketMine)
+
 
 //Example:
 InventoryMenuAPI::sendInventoryMenu($player, $array, 'INVNAME', InventoryMenuAPI::INVENTORY_TYPE_DOUBLE_CHEST);
 ```
 
-**HOW TO STOP AUTO CLOSING**
-
-Inventory menu will be closed after item moved. but you can stop this.
-To stop this function, set fifth parameter to false.
-```php
-InventoryMenuAPI::sendInventoryMenu($player, $array, 'INVNAME', InventoryMenuAPI::INVENTORY_TYPE_CHEST, false);
-```
-and you can refill another item after moved items.
-
 
 **CHANGING ITEMS TO INVENTORY MENU**
 ```php
 //$array is a new array included items
-InventoryMenuAPI::fillInventoryMenu($player, $items, $inventoryName, $inventoryType, $isCloseType);
+InventoryMenuAPI::fillInventoryMenu($player, $array);
 ```
-all parameter is same the sendInventoryMenu function
-you can set don't auto closing mode if third parameter is set to false
-NOTICE: You can't fill(change) inventory without using this function that is to say you can't change inventory with sendInventoryMenu (it won't be appear the inventory)
+
 
 
 **HOW TO CLOSE INVENTORY MENU**
@@ -93,7 +85,9 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
 
 `getItem()`         - Return Item which player clicked
 
-`getMenuName()`     - Return Inventory Menu Name
+`getMenuName()`     - Return Inventory Menu Name ( getTile()->getCustomName() )
+
+`getTile()`         - Return Inventory Menu Name Tile
 
 
 
@@ -103,6 +97,7 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
 ```
 `getPlayer()`       - Return Player object who clicked
 
+`getTile()`         - Return Inventory Menu Name Tile
 
 
 
@@ -113,6 +108,8 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 `getPlayer()`        - Return Player object who clicked
 
 `getInventoryType()` - Return generated inventory type as int
+
+`getTile()`          - Return Inventory Menu Name Tile
 
 `getItems()`         - Return array include items which generated with
 

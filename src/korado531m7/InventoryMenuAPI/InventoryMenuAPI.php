@@ -30,6 +30,12 @@ class InventoryMenuAPI extends PluginBase{
     const INVENTORY_TYPE_ENCHANTING_TABLE = 3;
     const INVENTORY_TYPE_HOPPER = 4;
     const INVENTORY_TYPE_BREWING_STAND = 5;
+    const INVENTORY_TYPE_ANVIL = 6;
+    const INVENTORY_TYPE_DISPENSER = 7;
+    const INVENTORY_TYPE_DROPPER = 8;
+    const INVENTORY_TYPE_BEACON = 9;
+    const INVENTORY_TYPE_TRADING = 10; //Not implemented yet :(
+    const INVENTORY_TYPE_COMMAND_BLOCK = 11; //Not implemented either
     
     public function onEnable(){
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
@@ -43,9 +49,8 @@ class InventoryMenuAPI extends PluginBase{
      * @param Item[]  $items
      * @param string  $inventoryName
      * @param int     $inventoryType
-     * @param bool    $isCloseType      Default value is true and if true, the inventory menu will be automatically closed when call InventoryTransactionPacket but if not, won't be closed. so you must call 'closeInventory' funtion to close manually
      */
-    public static function sendInventoryMenu(Player $player, array $items, $inventoryName = "Inventory Menu", $inventoryType = self::INVENTORY_TYPE_CHEST, bool $isCloseType = true){
+    public static function sendInventoryMenu(Player $player, array $items, $inventoryName = "Inventory Menu", $inventoryType = self::INVENTORY_TYPE_CHEST){
         if(self::isOpeningInventoryMenu($player)) return true;
         $x = (int) $player->x;
         $y = (int) $player->y + 4;
@@ -57,9 +62,40 @@ class InventoryMenuAPI extends PluginBase{
                 throw new \RuntimeException('Invalid Inventory Type');
             break;
             
+            case self::INVENTORY_TYPE_DISPENSER:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::DISPENSER);
+                $inv = new FakeInventory(WindowTypes::DISPENSER, new Vector3($x, $y, $z), [], 9);
+            break;
+            
+            case self::INVENTORY_TYPE_DROPPER:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::DROPPER);
+                $inv = new FakeInventory(WindowTypes::DROPPER, new Vector3($x, $y, $z), [], 9);
+            break;
+            
+            case self::INVENTORY_TYPE_BEACON:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::BEACON);
+                $inv = new FakeInventory(WindowTypes::BEACON, new Vector3($x, $y, $z), [], 1); //?
+            break;
+            
+            case self::INVENTORY_TYPE_TRADING:
+                throw new \RuntimeException('Trading Inventory is not supported on account of not impletented yet :(');
+                //$inv = new FakeInventory(WindowTypes::TRADING, new Vector3($x, $y, $z), [], 27);
+            break;
+            
+            case self::INVENTORY_TYPE_COMMAND_BLOCK:
+                throw new \RuntimeException('Command Block Inventory is not supported on account of not impletented yet :(');
+                //self::sendFakeBlock($player, $x, $y, $z, BlockIds::COMMAND_BLOCK);
+                //$inv = new FakeInventory(WindowTypes::COMMAND_BLOCK, new Vector3($x, $y, $z), [], 0); //?
+            break;
+            
             case self::INVENTORY_TYPE_CHEST:
                 self::sendFakeBlock($player, $x, $y, $z, BlockIds::CHEST);
                 $inv = new FakeInventory(WindowTypes::CONTAINER, new Vector3($x, $y, $z), [], 27);
+            break;
+            
+            case self::INVENTORY_TYPE_ANVIL:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::ANVIL);
+                $inv = new FakeInventory(WindowTypes::ANVIL, new Vector3($x, $y, $z), [], 27);
             break;
             
             case self::INVENTORY_TYPE_ENCHANTING_TABLE:
@@ -101,28 +137,32 @@ class InventoryMenuAPI extends PluginBase{
             case self::INVENTORY_TYPE_HOPPER:
             case self::INVENTORY_TYPE_CHEST:
             case self::INVENTORY_TYPE_BREWING_STAND:
-                self::$inventoryMenuVar[$player->getName()] = array($inventoryType,$x,$y,$z,$isCloseType,$inventoryName);
+            case self::INVENTORY_TYPE_ANVIL:
+            case self::INVENTORY_TYPE_DISPENSER:
+            case self::INVENTORY_TYPE_DROPPER:
+            case self::INVENTORY_TYPE_BEACON:
+                self::$inventoryMenuVar[$player->getName()] = array($inventoryType,$x,$y,$z,$inventoryName);
+            case self::INVENTORY_TYPE_COMMAND_BLOCK:
+            case self::INVENTORY_TYPE_TRADING:
                 $player->addWindow($inv);
             break;
             
             case self::INVENTORY_TYPE_DOUBLE_CHEST:
-                self::$inventoryMenuVar[$player->getName()] = array(self::INVENTORY_TYPE_DOUBLE_CHEST,$x,$y,$z,$isCloseType,$inventoryName);
+                self::$inventoryMenuVar[$player->getName()] = array(self::INVENTORY_TYPE_DOUBLE_CHEST,$x,$y,$z,$inventoryName);
                 self::getPluginBase()->getScheduler()->scheduleDelayedTask(new DelayAddWindowTask($player,$inv), 10);
             break;
         }
     }
     
     /**
-     * Change old item for new items in the inventory menu but it must be isCloseType is false
-     * Also you can change $isCloseType in this function (default: false)
-     *
      * @param Player  $player
      * @param Item[]  $items
-     * @param bool    $isCloseType
+     * @param string  $inventoryName
+     * @param int     $inventoryType
      */
-    public static function fillInventoryMenu(Player $player, array $items, $inventoryName = "Fill Menu", $inventoryType = self::INVENTORY_TYPE_CHEST, bool $isCloseType = true){
-        self::closeInventoryMenu($player);
-        self::getPluginBase()->getScheduler()->scheduleDelayedTask(new DelaySendInventoryTask($player,$items, $inventoryName,$inventoryType, $isCloseType), 10);
+    public static function fillInventoryMenu(Player $player, array $items, $inventoryName = "Fill Menu", $inventoryType = self::INVENTORY_TYPE_CHEST){
+        self::closeInventoryMenu($player); //Need this?
+        self::getPluginBase()->getScheduler()->scheduleDelayedTask(new DelaySendInventoryTask($player,$items, $inventoryName,$inventoryType), 10);
     }
     
     /**
@@ -141,6 +181,12 @@ class InventoryMenuAPI extends PluginBase{
             case self::INVENTORY_TYPE_HOPPER:
             case self::INVENTORY_TYPE_BREWING_STAND:
             case self::INVENTORY_TYPE_ENCHANTING_TABLE:
+            case self::INVENTORY_TYPE_ANVIL:
+            case self::INVENTORY_TYPE_DISPENSER:
+            case self::INVENTORY_TYPE_DROPPER:
+            case self::INVENTORY_TYPE_BEACON:
+            case self::INVENTORY_TYPE_TRADING:
+            case self::INVENTORY_TYPE_COMMAND_BLOCK:
                 self::sendFakeBlock($player,$data[1],$data[2],$data[3],BlockIds::AIR);
             break;
         }

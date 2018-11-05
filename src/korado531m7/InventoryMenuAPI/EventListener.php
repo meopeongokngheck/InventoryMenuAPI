@@ -20,8 +20,8 @@ class EventListener implements Listener{
         $object = $event->getTransaction()->getSource();
         if($object instanceof Player){
             if($this->plugin->isOpeningInventoryMenu($object)){
-                $this->plugin->restoreInventory($object);
                 $event->setCancelled();
+                $this->plugin->restoreInventory($object);
             }
         }
     }
@@ -40,8 +40,8 @@ class EventListener implements Listener{
                     $data = $this->plugin->getData($player);
                     $itemresult = $action->oldItem;
                     if($action->oldItem->getId() == 0) $itemresult = $action->newItem;
-                    Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuClickEvent($player, $itemresult,$data[5]));
-                    if($data[4] == true) $this->plugin->closeInventoryMenu($player);
+                    Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuClickEvent($player, $itemresult,$data[4]));
+                    $this->plugin->closeInventoryMenu($player);
                 }
             break;
         }

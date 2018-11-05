@@ -7,15 +7,14 @@ use pocketmine\Player;
 use pocketmine\item\Item;
 
 class DelaySendInventoryTask extends Task{
-    public function __construct($player,$items, $inventoryName,$inventoryType, $isCloseType){
+    public function __construct($player,$items, $inventoryName,$inventoryType){
         $this->player = $player;
         $this->items = $items;
         $this->inventoryName = $inventoryName;
         $this->inventoryType = $inventoryType;
-        $this->isCloseType = $isCloseType;
     }
     
     public function onRun(int $tick) : void{
-        InventoryMenuAPI::sendInventoryMenu($this->player,$this->items, $this->inventoryName,$this->inventoryType, $this->isCloseType);
+        InventoryMenuAPI::sendInventoryMenu($this->player,$this->items, $this->inventoryName,$this->inventoryType);
     }
 }
