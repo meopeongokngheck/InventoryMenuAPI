@@ -9,12 +9,14 @@ use pocketmine\event\plugin\PluginEvent;
 
 class InventoryMenuCloseEvent extends PluginEvent{
     private $who;
+    private $name;
 
     /**
      * @param Player $who
      */
-    public function __construct(Player $who){
+    public function __construct(Player $who, string $name){
         $this->who = $who;
+        $this->name = $name;
     }
 
     /**
@@ -22,5 +24,12 @@ class InventoryMenuCloseEvent extends PluginEvent{
      */
     public function getPlayer() : Player{
         return $this->who;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getMenuName() : string{
+        return $this->name;
     }
 }

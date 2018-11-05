@@ -56,10 +56,10 @@ class InventoryMenuAPI extends PluginBase{
         $y = (int) $player->y + 4;
         $z = (int) $player->z;
         
-        if(count($items) === 0) $maxKey = 0; else $maxKey = max(array_keys($items));
+        //if(count($items) === 0) $maxKey = 0; else $maxKey = max(array_keys($items));
         switch($inventoryType){
             default:
-                throw new \RuntimeException('Invalid Inventory Type');
+                throw new \InvalidArgumentException('Invalid Inventory Type');
             break;
             
             case self::INVENTORY_TYPE_DISPENSER:
@@ -131,7 +131,7 @@ class InventoryMenuAPI extends PluginBase{
         foreach($items as $itemkey => $item){
             $inv->setItem($itemkey,$item);
         }
-        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuGenerateEvent($player,$items,$inventoryType));
+        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuGenerateEvent($player,$items,$inventoryType,$inventoryName));
         switch($inventoryType){
             case self::INVENTORY_TYPE_ENCHANTING_TABLE:
             case self::INVENTORY_TYPE_HOPPER:
@@ -173,7 +173,7 @@ class InventoryMenuAPI extends PluginBase{
     public static function closeInventoryMenu(Player $player){
         if(!self::isOpeningInventoryMenu($player)) return true;
         $data = self::getData($player);
-        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuCloseEvent($player));
+        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuCloseEvent($player, $data[4]));
         switch($data[0]){
             case self::INVENTORY_TYPE_DOUBLE_CHEST:
                 self::sendFakeBlock($player,$data[1],$data[2],$data[3] + 1,BlockIds::AIR);

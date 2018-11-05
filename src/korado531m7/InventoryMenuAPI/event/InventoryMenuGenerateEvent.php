@@ -12,16 +12,18 @@ class InventoryMenuGenerateEvent extends PluginEvent{
     private $who;
     private $invType;
     private $items;
+    private $name;
 
     /**
      * @param Player $who
      * @param string $name
      * @param Tile $tile
      */
-    public function __construct(Player $who, array $items,int $invType){
+    public function __construct(Player $who, array $items,int $invType, string $name){
         $this->who = $who;
         $this->items = $items;
         $this->invType = $invType;
+        $this->name = $name;
     }
 
     /**
@@ -43,5 +45,12 @@ class InventoryMenuGenerateEvent extends PluginEvent{
      */
     public function getItems() : array{
         return $this->items;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getMenuName() : string{
+        return $this->name;
     }
 }

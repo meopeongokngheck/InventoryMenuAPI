@@ -85,9 +85,7 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
 
 `getItem()`         - Return Item which player clicked
 
-`getMenuName()`     - Return Inventory Menu Name ( getTile()->getCustomName() )
-
-`getTile()`         - Return Inventory Menu Name Tile
+`getMenuName()`     - Return Inventory Menu Name
 
 
 
@@ -97,7 +95,7 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
 ```
 `getPlayer()`       - Return Player object who clicked
 
-`getTile()`         - Return Inventory Menu Name Tile
+`getMenuName()`     - Return Inventory Menu Name
 
 
 
@@ -109,9 +107,9 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 
 `getInventoryType()` - Return generated inventory type as int
 
-`getTile()`          - Return Inventory Menu Name Tile
-
 `getItems()`         - Return array include items which generated with
+
+`getMenuName()`      - Return Inventory Menu Name
 
 
 
