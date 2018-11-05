@@ -4,24 +4,21 @@ namespace korado531m7\InventoryMenuAPI;
 use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
 use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 use korado531m7\InventoryMenuAPI\task\DelayAddWindowTask;
+use korado531m7\InventoryMenuAPI\task\DelaySendInventoryTask;
+use korado531m7\InventoryMenuAPI\inventory\FakeInventory;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIds;
 use pocketmine\item\Item;
-use pocketmine\inventory\EnchantInventory;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\plugin\PluginBase;
-use pocketmine\tile\Chest as TileChest;
-use pocketmine\tile\Furnace as TileFurnace;
-use pocketmine\tile\EnchantTable as TileEnchantTable;
-use pocketmine\tile\EnderChest as TileEnderChest;
-use pocketmine\tile\Tile;
 
 class InventoryMenuAPI extends PluginBase{
     private static $inventoryMenuVar = [];
@@ -30,9 +27,9 @@ class InventoryMenuAPI extends PluginBase{
     
     const INVENTORY_TYPE_CHEST = 1;
     const INVENTORY_TYPE_DOUBLE_CHEST = 2;
-    const INVENTORY_TYPE_FURNACE = 3;
-    const INVENTORY_TYPE_ENCHANTING_TABLE = 4;
-    const INVENTORY_TYPE_ENDER_CHEST = 5;
+    const INVENTORY_TYPE_ENCHANTING_TABLE = 3;
+    const INVENTORY_TYPE_HOPPER = 4;
+    const INVENTORY_TYPE_BREWING_STAND = 5;
     
     public function onEnable(){
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
@@ -50,110 +47,66 @@ class InventoryMenuAPI extends PluginBase{
      */
     public static function sendInventoryMenu(Player $player, array $items, $inventoryName = "Inventory Menu", $inventoryType = self::INVENTORY_TYPE_CHEST, bool $isCloseType = true){
         if(self::isOpeningInventoryMenu($player)) return true;
-        $x = ((int)$player->x + mt_rand(-1,1));
-        $y = ((int)$player->y + 4);
-        $z = ((int)$player->z + mt_rand(-1,1));
-        if($player->getLevel()->getTileAt($x,$y,$z) !== null) $y = ((int)$player->y + 3);
-        if(count($items) === 0) $maxKey = 0;
-        else $maxKey = max(array_keys($items));
+        $x = (int) $player->x;
+        $y = (int) $player->y + 4;
+        $z = (int) $player->z;
+        
+        if(count($items) === 0) $maxKey = 0; else $maxKey = max(array_keys($items));
         switch($inventoryType){
-            case self::INVENTORY_TYPE_FURNACE:
-                if($maxKey > 2) throw new \RuntimeException('Invalid key for furnace expected 0, 1 got '.$maxKey);
-                self::sendFakeBlock($player,$x,$y,$z,BlockIds::FURNACE);
-                $nbt = TileFurnace::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
-                $nbt->setString('CustomName',$inventoryName);
-                $tile = Tile::createTile(Tile::FURNACE, $player->getLevel(), $nbt);
-                $tag = new CompoundTag();
-                $tag->setString('id', $tile->getSaveId());
-                $tag->setString('CustomName', $inventoryName);
-                $inv = $tile->getInventory();
+            default:
+                throw new \RuntimeException('Invalid Inventory Type');
             break;
             
-            case self::INVENTORY_TYPE_ENCHANTING_TABLE:    
-                if($maxKey > 2) throw new \RuntimeException('Invalid key for furnace expected 0, 1 got '.$maxKey);
-                self::sendFakeBlock($player,$x,$y,$z,BlockIds::ENCHANTING_TABLE);
-                $nbt = TileEnchantTable::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
-                $nbt->setString('CustomName',$inventoryName);
-                $tile = Tile::createTile(Tile::ENCHANT_TABLE, $player->getLevel(), $nbt);
-                $tag = new CompoundTag();
-                $tag->setString('id', $tile->getSaveId());
-                $tag->setString('CustomName', $inventoryName);
-                $inv = new EnchantInventory(new Position($x,$y,$z,$player->getLevel()));
+            case self::INVENTORY_TYPE_CHEST:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::CHEST);
+                $inv = new FakeInventory(WindowTypes::CONTAINER, new Vector3($x, $y, $z), [], 27);
             break;
             
-            case self::INVENTORY_TYPE_ENDER_CHEST:    
-                if($maxKey > 27) throw new \RuntimeException('Invalid key for furnace expected between 0 and 26 got '.$maxKey);
-                self::sendFakeBlock($player,$x,$y,$z,BlockIds::ENDER_CHEST);
-                $nbt = TileEnchantTable::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
-                $nbt->setString('CustomName',$inventoryName);
-                $tile = Tile::createTile(Tile::ENDER_CHEST, $player->getLevel(), $nbt);
-                $player->getEnderChestInventory()->setHolderPosition($tile);
-                $tag = new CompoundTag();
-                $tag->setString('id', $tile->getSaveId());
-                $tag->setString('CustomName', $inventoryName);
-                $inv = $player->getEnderChestInventory();
+            case self::INVENTORY_TYPE_ENCHANTING_TABLE:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::ENCHANTING_TABLE);
+                $inv = new FakeInventory(WindowTypes::ENCHANTMENT, new Vector3($x, $y, $z), [], 5);
             break;
             
+            case self::INVENTORY_TYPE_BREWING_STAND:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::BREWING_STAND_BLOCK);
+                $inv = new FakeInventory(WindowTypes::BREWING_STAND, new Vector3($x, $y, $z), [], 5); //5?
+            break;
+            
+            case self::INVENTORY_TYPE_HOPPER:
+                self::sendFakeBlock($player, $x, $y, $z, BlockIds::HOPPER_BLOCK);
+                $inv = new FakeInventory(WindowTypes::HOPPER, new Vector3($x, $y, $z), [], 5);
+            break;
+                
             case self::INVENTORY_TYPE_DOUBLE_CHEST:
-                if($maxKey > 54) throw new \RuntimeException('Invalid key for furnace expected between 0 and 53 got '.$maxKey);
-                self::sendFakeBlock($player,$x,$y,$z + 1,BlockIds::CHEST);
-                $nbt2 = TileChest::createNBT(new Vector3($x,$y,$z + 1), 0, Item::get(0,0), $player);
-                $tile2 = Tile::createTile(Tile::CHEST, $player->getLevel(), $nbt2);
-                $writer = new NetworkLittleEndianNBTStream();
+                self::sendFakeBlock($player, $x, $y, $z,BlockIds::CHEST);
+                self::sendFakeBlock($player, $x, $y, $z + 1,BlockIds::CHEST);
                 $tag = new CompoundTag();
-                $tag->setString('id', $tile2->getSaveId());
                 $tag->setInt('pairx', $x);
                 $tag->setInt('pairz', $z);
-                $tag->setString('CustomName', $inventoryName);
-                
-                $pk = new BlockEntityDataPacket;
-                $pk->x = $x;
-                $pk->y = $y;
-                $pk->z = $z + 1;
-                $pk->namedtag = $writer->write($tag);
-                $player->dataPacket($pk);
-            case self::INVENTORY_TYPE_CHEST:
-                if($maxKey > 27) throw new \RuntimeException('Invalid key for furnace expected between 0 and 26 got '.$maxKey);
-                self::sendFakeBlock($player,$x,$y,$z,BlockIds::CHEST);
-                $nbt = TileChest::createNBT(new Vector3($x,$y,$z), 0, Item::get(0,0), $player);
-                $nbt->setString('CustomName',$inventoryName);
-                $tile = Tile::createTile(Tile::CHEST, $player->getLevel(), $nbt);
-                $tag = new CompoundTag();
-                $tag->setString('id', $tile->getSaveId());
-                $tag->setString('CustomName', $inventoryName);
-                if($inventoryType == self::INVENTORY_TYPE_DOUBLE_CHEST) $tile->pairWith($tile2);
-                $inv = $tile->getInventory();
+                self::sendTagData($player, $tag, $x, $y, $z + 1);
+                $inv = new FakeInventory(WindowTypes::CONTAINER, new Vector3($x, $y, $z), [], 54);
             break;
         }
+        $tag = new CompoundTag();
+        $tag->setString('CustomName', $inventoryName);
+        self::sendTagData($player, $tag, $x, $y, $z);
         
-        $writer = new NetworkLittleEndianNBTStream();
-        $pk = new BlockEntityDataPacket;
-        $pk->x = $x;
-        $pk->y = $y;
-        $pk->z = $z;
-        $pk->namedtag = $writer->write($tag);
-        $player->dataPacket($pk);
-        
+        self::saveInventory($player);
         foreach($items as $itemkey => $item){
             $inv->setItem($itemkey,$item);
         }
-        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuGenerateEvent($player,$items,$tile,$inventoryType));
-        self::saveInventory($player);
+        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuGenerateEvent($player,$items,$inventoryType));
         switch($inventoryType){
-            case self::INVENTORY_TYPE_ENDER_CHEST:
             case self::INVENTORY_TYPE_ENCHANTING_TABLE:
-                self::$inventoryMenuVar[$player->getName()] = array($inventoryType,$tile->getSaveId(),$x,$y,$z,$player->getLevel()->getName(),$isCloseType,$inv);
-                $player->addWindow($inv);
-            break;
-            
-            case self::INVENTORY_TYPE_FURNACE:
+            case self::INVENTORY_TYPE_HOPPER:
             case self::INVENTORY_TYPE_CHEST:
-                self::$inventoryMenuVar[$player->getName()] = array($inventoryType,$tile->getSaveId(),$x,$y,$z,$player->getLevel()->getName(),$isCloseType);
+            case self::INVENTORY_TYPE_BREWING_STAND:
+                self::$inventoryMenuVar[$player->getName()] = array($inventoryType,$x,$y,$z,$isCloseType,$inventoryName);
                 $player->addWindow($inv);
             break;
             
             case self::INVENTORY_TYPE_DOUBLE_CHEST:
-                self::$inventoryMenuVar[$player->getName()] = array(self::INVENTORY_TYPE_DOUBLE_CHEST,$tile->getSaveId(),$x,$y,$z,$player->getLevel()->getName(),$isCloseType);
+                self::$inventoryMenuVar[$player->getName()] = array(self::INVENTORY_TYPE_DOUBLE_CHEST,$x,$y,$z,$isCloseType,$inventoryName);
                 self::getPluginBase()->getScheduler()->scheduleDelayedTask(new DelayAddWindowTask($player,$inv), 10);
             break;
         }
@@ -167,36 +120,9 @@ class InventoryMenuAPI extends PluginBase{
      * @param Item[]  $items
      * @param bool    $isCloseType
      */
-    public static function fillInventoryMenu(Player $player,array $items,bool $isCloseType = false){
-        if(!self::isOpeningInventoryMenu($player)) return false;
-        $data = self::getData($player);
-        $tile = Server::getInstance()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
-        if($tile === \null) return false;
-        $inv = $tile->getInventory();
-        $inv->clearAll();
-        foreach($items as $itemkey => $item){
-            $inv->setItem($itemkey,$item);
-        }
-        $data[6] = $isCloseType;
-        self::restoreInventory($player);
-        self::$inventoryMenuVar[$player->getName()] = $data;
-    }
-    
-    /**
-     * Clear all items from an inventory menu (for development)
-     *
-     * @param Player  $player
-     * @param bool    $isCloseType
-     */
-    public static function clearInventoryMenu(Player $player,bool $isCloseType = false){
-        if(!self::isOpeningInventoryMenu($player)) return false;
-        $data = self::getData($player);
-        $tile = Server::getInstance()->getLevelByName($data[5])->getTileAt($data[2],$data[3],$data[4]);
-        if($tile === \null) return false;
-        $inv = $tile->getInventory();
-        $inv->clearAll();
-        $data[6] = $isCloseType;
-        self::$inventoryMenuVar[$player->getName()] = $data;
+    public static function fillInventoryMenu(Player $player, array $items, $inventoryName = "Fill Menu", $inventoryType = self::INVENTORY_TYPE_CHEST, bool $isCloseType = true){
+        self::closeInventoryMenu($player);
+        self::getPluginBase()->getScheduler()->scheduleDelayedTask(new DelaySendInventoryTask($player,$items, $inventoryName,$inventoryType, $isCloseType), 10);
     }
     
     /**
@@ -207,25 +133,16 @@ class InventoryMenuAPI extends PluginBase{
     public static function closeInventoryMenu(Player $player){
         if(!self::isOpeningInventoryMenu($player)) return true;
         $data = self::getData($player);
-        if(Server::getInstance()->isLevelLoaded($data[5])){
-            $level = Server::getInstance()->getLevelByName($data[5]);
-            Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuCloseEvent($player, $level->getTile(new Vector3($data[2],$data[3],$data[4]))));
-            switch($data[0]){
-                case self::INVENTORY_TYPE_ENCHANTING_TABLE:
-                case self::INVENTORY_TYPE_ENDER_CHEST:
-                    $player->removeWindow($data[7]);
-                    self::sendFakeBlock($player,$data[2],$data[3],$data[4],BlockIds::AIR);
-                break;
-                
-                case self::INVENTORY_TYPE_DOUBLE_CHEST:
-                    self::sendFakeBlock($player,$data[2],$data[3],$data[4] + 1,BlockIds::AIR);
-                    $level->removeTile($level->getTile(new Vector3($data[2],$data[3],$data[4] + 1)));
-                case self::INVENTORY_TYPE_CHEST:
-                case self::INVENTORY_TYPE_FURNACE:
-                    self::sendFakeBlock($player,$data[2],$data[3],$data[4],BlockIds::AIR);
-                    $level->removeTile($level->getTile(new Vector3($data[2],$data[3],$data[4])));
-                break;
-            }
+        Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuCloseEvent($player));
+        switch($data[0]){
+            case self::INVENTORY_TYPE_DOUBLE_CHEST:
+                self::sendFakeBlock($player,$data[1],$data[2],$data[3] + 1,BlockIds::AIR);
+            case self::INVENTORY_TYPE_CHEST:
+            case self::INVENTORY_TYPE_HOPPER:
+            case self::INVENTORY_TYPE_BREWING_STAND:
+            case self::INVENTORY_TYPE_ENCHANTING_TABLE:
+                self::sendFakeBlock($player,$data[1],$data[2],$data[3],BlockIds::AIR);
+            break;
         }
         self::restoreInventory($player, true);
         unset(self::$inventoryMenuVar[$player->getName()]);
@@ -266,6 +183,16 @@ class InventoryMenuAPI extends PluginBase{
     
     private static function setPluginBase(PluginBase $plugin){
         self::$pluginbase = $plugin;
+    }
+    
+    private static function sendTagData(Player $player, CompoundTag $tag, int $x, int $y, int $z){
+        $writer = new NetworkLittleEndianNBTStream();
+        $pk = new BlockEntityDataPacket;
+        $pk->x = $x;
+        $pk->y = $y;
+        $pk->z = $z;
+        $pk->namedtag = $writer->write($tag);
+        $player->dataPacket($pk);
     }
     
     private static function sendFakeBlock(Player $player,int $x,int $y,int $z,int $blockid){

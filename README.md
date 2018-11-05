@@ -42,9 +42,7 @@ Wow its easy!
 To change inventory type, need to place type int to fourth parameter from supported type (Default: chest)
 ```php
 //Supported list
-const INVENTORY_TYPE_CHEST = 1;
-const INVENTORY_TYPE_DOUBLE_CHEST = 2;
-const INVENTORY_TYPE_FURNACE = 3;
+const INVENTORY_TYPE_CHEST = 1;const INVENTORY_TYPE_DOUBLE_CHEST = 2;const INVENTORY_TYPE_ENCHANTING_TABLE = 3;const INVENTORY_TYPE_HOPPER = 4;const INVENTORY_TYPE_BREWING_STAND = 5;
 
 //Example:
 InventoryMenuAPI::sendInventoryMenu($player, $array, 'INVNAME', InventoryMenuAPI::INVENTORY_TYPE_DOUBLE_CHEST);
@@ -63,9 +61,11 @@ and you can refill another item after moved items.
 **CHANGING ITEMS TO INVENTORY MENU**
 ```php
 //$array is a new array included items
-InventoryMenuAPI::fillInventoryMenu($player, $array);
+InventoryMenuAPI::fillInventoryMenu($player, $items, $inventoryName, $inventoryType, $isCloseType);
 ```
-and you can set don't auto closing mode if third parameter is set to false
+all parameter is same the sendInventoryMenu function
+you can set don't auto closing mode if third parameter is set to false
+NOTICE: You can't fill(change) inventory without using this function that is to say you can't change inventory with sendInventoryMenu (it won't be appear the inventory)
 
 
 **HOW TO CLOSE INVENTORY MENU**
@@ -93,9 +93,7 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
 
 `getItem()`         - Return Item which player clicked
 
-`getMenuName()`     - Return Inventory Menu Name ( getTile()->getCustomName() )
-
-`getTile()`         - Return Inventory Menu Name Tile
+`getMenuName()`     - Return Inventory Menu Name
 
 
 
@@ -105,7 +103,6 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
 ```
 `getPlayer()`       - Return Player object who clicked
 
-`getTile()`         - Return Inventory Menu Name Tile
 
 
 
@@ -116,8 +113,6 @@ use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
 `getPlayer()`        - Return Player object who clicked
 
 `getInventoryType()` - Return generated inventory type as int
-
-`getTile()`          - Return Inventory Menu Name Tile
 
 `getItems()`         - Return array include items which generated with
 

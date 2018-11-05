@@ -40,8 +40,8 @@ class EventListener implements Listener{
                     $data = $this->plugin->getData($player);
                     $itemresult = $action->oldItem;
                     if($action->oldItem->getId() == 0) $itemresult = $action->newItem;
-					Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuClickEvent($player, $itemresult, $player->getLevel()->getTile(new Vector3($data[2],$data[3],$data[4]))));
-                    if($data[6] == true) $this->plugin->closeInventoryMenu($player);
+                    Server::getInstance()->getPluginManager()->callEvent(new InventoryMenuClickEvent($player, $itemresult,$data[5]));
+                    if($data[4] == true) $this->plugin->closeInventoryMenu($player);
                 }
             break;
         }
