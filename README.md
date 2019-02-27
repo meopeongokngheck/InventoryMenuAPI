@@ -5,10 +5,15 @@
 You can download converted to phar version file from [here](https://poggit.pmmp.io/ci/korado531m7/InventoryMenuAPI/InventoryMenuAPI)
 
 ### How to use
-First, you need to write use
+Before using, you need to import class
 ```php
 <?php
 use korado531m7\InventoryMenuAPI\InventoryMenuAPI;
+```
+
+If you use api as virion, you must call register function statically
+```php
+InventoryMenuAPI::register($param); //param must be included PluginBase
 ```
 
 Second, you need to define an array that include items like
@@ -18,99 +23,71 @@ $array = [3 => Item::get(4,0,1), 7 => Item::get(46,0,5), 12 => Item::get(246,0,1
 ```
 these items will be set on inventory menu
 
-To send inventory menu, use 'sendInventoryMenu' function like this
+To send inventory menu, create InventoryMenu instance
 ```php
-$array = '';// that you defined items array
-$player = ''; //Player object
-
-InventoryMenuAPI::sendInventoryMenu($player, $array);
+$inv = new InventoryMenu();
 ```
-Call this function to send and will be displayed inventory menu on your screen :D
-(And i will use this $array and $player in this documentation)
+
+then, call send function
+```php
+$inv->send($player); //$player is player object
+```
+
+
+**SET READONLY (WRITABLE) INVENTORY**
+
+To enable to edit inventory, use setReadonly function (default value is true)
+```php
+$inv->setReadonly(false); //boolean
+```
+
 
 **RENAMING INVENTORY MENU NAME**
 
-To change inventory name, place a text to third parameter like
+To change inventory name, call setName function
 ```php
-InventoryMenuAPI::sendInventoryMenu($player, $array, "NAME HERE WHAT YOU WANT TO RENAME");
+$inv->setName('WRITE NAME HERE');
 ```
-Wow its easy!
-
 
 **CHANGING INVENTORY TYPE**
 
-To change inventory type, need to place type int to fourth parameter from supported type (Default: chest)
+To change inventory type, need to place type int to first parameter when create inventory menu instance (Default: chest)
 ```php
 //Supported list
 const INVENTORY_TYPE_CHEST = 1;const INVENTORY_TYPE_DOUBLE_CHEST = 2;const INVENTORY_TYPE_ENCHANTING_TABLE = 3;const INVENTORY_TYPE_HOPPER = 4;const INVENTORY_TYPE_BREWING_STAND = 5;const INVENTORY_TYPE_ANVIL = 6;const INVENTORY_TYPE_DISPENSER = 7;const INVENTORY_TYPE_DROPPER = 8;const INVENTORY_TYPE_BEACON = 9;const INVENTORY_TYPE_TRADING = 10;
 const INVENTORY_TYPE_COMMAND_BLOCK = 11;
-NOTICE: Trading and command block is not supported (not implemented on PocketMine)
-
+//NOTICE: Trading and command block are not supported (not implemented on PocketMine)
 
 //Example:
-InventoryMenuAPI::sendInventoryMenu($player, $array, 'INVNAME', InventoryMenuAPI::INVENTORY_TYPE_DOUBLE_CHEST);
+$inv = new InventoryMenu(InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE);
 ```
-
-
-**CHANGING ITEMS TO INVENTORY MENU**
-```php
-//$array is a new array included items
-InventoryMenuAPI::fillInventoryMenu($player, $array);
-```
-
+These constants are written in `korado531m7\InventoryMenuAPI\InventoryTypes` interface
 
 
 **HOW TO CLOSE INVENTORY MENU**
 
-To close inventory menu, use 'closeInventoryMenu' function
+To close inventory menu, use close function
 ```php
-InventoryMenuAPI::closeInventoryMenu($player);
+$inv->close($player); //$player is player object who is opening inventory menu
 ```
-it's simple
-
 
 
 ### DEALING WITH EVENT
 This api will call event and you can use that!
 
-**ON CLICKED ITEMS**
+**WHEN CLICKED ITEMS**
 
-You can an event when player clicked items
-it's InventoryMenuClickEvent
+You can use event when player clicked items
+it's InventoryClickEvent
 here's the documentation
 ```php
-use korado531m7\InventoryMenuAPI\event\InventoryMenuClickEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
 ```
-`getPlayer()`       - Return Player object who clicked
-
-`getItem()`         - Return Item which player clicked
-
-`getMenuName()`     - Return Inventory Menu Name
-
-
-
-**ON CLOSED INVENTORY MENU**
-```php
-use korado531m7\InventoryMenuAPI\event\InventoryMenuCloseEvent;
-```
-`getPlayer()`       - Return Player object who clicked
-
-`getMenuName()`     - Return Inventory Menu Name
-
-
-
-**ON GENERATED INVENTORY MENU**
-```php
-use korado531m7\InventoryMenuAPI\event\InventoryMenuGenerateEvent;
-```
-`getPlayer()`        - Return Player object who clicked
-
-`getInventoryType()` - Return generated inventory type as int
-
-`getItems()`         - Return array include items which generated with
-
-`getMenuName()`      - Return Inventory Menu Name
-
+* `getPlayer()`          - Return Player object who clicked
+* `getItem()`            - Return Item which player clicked
+* `getInventory()`       - Return Fake Inventory
+* `getAction()`          - Return NetworkInventoryAction
+* `getTransactionType()` - Return integer
 
 
 
