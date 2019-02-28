@@ -14,6 +14,7 @@ class FakeMenuInventory extends ContainerInventory{
         $this->network_type = $network_type;
         $this->title = $title;
         $this->size = $size;
+        $this->holder = $pos;
         parent::__construct($pos, [], $size, $title);
     }
 
@@ -35,9 +36,5 @@ class FakeMenuInventory extends ContainerInventory{
     
     public function setName(string $title){
         $this->title = $title;
-    }
-    
-    public function setHolderPos(?Vector3 $pos){
-        $this->holder = $pos;
     }
 }

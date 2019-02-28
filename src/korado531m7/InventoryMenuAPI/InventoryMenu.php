@@ -17,7 +17,6 @@ class InventoryMenu implements InventoryTypes{
     private $item = [];
     private $position;
     private $readonly = true;
-    private $continuity = false;
     
     public function __construct(int $type = InventoryTypes::INVENTORY_TYPE_CHEST){
         $this->type = $type;
@@ -71,7 +70,6 @@ class InventoryMenu implements InventoryTypes{
         $pos = clone $player->floor()->add(0, 4);
         $this->position = $pos;
         $inv = new FakeMenuInventory($pos, IMU::getInventoryWindowTypes($this->getType()), IMU::getMaxInventorySize($this->getType()), $this->getName());
-        $inv->setHolderPos($pos);
         foreach($this->item as $k => $i){
             $inv->setItem($k, $i);
         }
