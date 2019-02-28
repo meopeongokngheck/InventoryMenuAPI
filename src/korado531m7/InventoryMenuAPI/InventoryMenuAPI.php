@@ -11,6 +11,7 @@ class InventoryMenuAPI extends PluginBase{
     
     public function onEnable(){
         self::register($this);
+        $this->getLogger()->notice('You are using this api as plugin. We recommend you to use this as virion');
     }
     
     /**

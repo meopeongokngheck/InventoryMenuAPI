@@ -5,6 +5,7 @@ use korado531m7\InventoryMenuAPI\InventoryMenuAPI;
 use korado531m7\InventoryMenuAPI\InventoryTypes;
 
 use pocketmine\Player;
+use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockIds;
 use pocketmine\math\Vector3;
@@ -85,7 +86,7 @@ class InventoryMenuUtils{
             case InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE:
                 return BlockIds::ENCHANTING_TABLE;
             case InventoryTypes::INVENTORY_TYPE_BREWING_STAND:
-                return BlockIds::BREWING_STAND;
+                return BlockIds::BREWING_STAND_BLOCK;
             case InventoryTypes::INVENTORY_TYPE_HOPPER:
                 return BlockIds::HOPPER_BLOCK;
         }
@@ -115,5 +116,9 @@ class InventoryMenuUtils{
             case InventoryTypes::INVENTORY_TYPE_TRADING:
                 return WindowTypes::TRADING;
         }
+    }
+    
+    public static function getDefaultInventoryName(int $type){
+        return Block::get(self::getInventoryBlockId($type))->getName();
     }
 }

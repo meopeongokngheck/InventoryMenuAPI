@@ -12,7 +12,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 
 class InventoryMenu implements InventoryTypes{
-    private $title = 'Virtual Inventory';
+    private $title;
     private $type;
     private $item = [];
     private $position;
@@ -20,52 +20,107 @@ class InventoryMenu implements InventoryTypes{
     
     public function __construct(int $type = InventoryTypes::INVENTORY_TYPE_CHEST){
         $this->type = $type;
+        $this->title = IMU::getDefaultInventoryName($type);
     }
     
-    public function setItem(int $index, Item $item){
+    /**
+     * Set item to specific index
+     *
+     * @param int  $index
+     * @param Item $item
+     *
+     * @return InventoryMenu
+     */
+    public function setItem(int $index, Item $item) : InventoryMenu{
         $this->item[$index] = $item;
         return $this;
     }
     
-    public function setContents(array $items){
+    /**
+     * Set items
+     *
+     * @param Item[] $items
+     *
+     * @return InventoryMenu
+     */
+    public function setContents(array $items) : InventoryMenu{
         $this->item = $items;
         return $this;
     }
     
-    public function setName(string $title){
+    /**
+     * Set inventory name
+     *
+     * @param string $title
+     *
+     * @return InventoryMenu
+     */
+    public function setName(string $title) : InventoryMenu{
         $this->title = $title;
         return $this;
     }
     
-    public function setReadonly(bool $bool){
-        $this->readonly = $bool;
+    /**
+     * Enable to trade between player and inventory
+     *
+     * @param bool $value
+     *
+     * @return InventoryMenu
+     */
+    public function setReadonly(bool $value) : InventoryMenu{
+        $this->readonly = $value;
         return $this;
     }
     
-    public function getItem(int $index){
-        return $this->item[$index];
+    /**
+     * Get item from specific index
+     *
+     * @return Item|null
+     */
+    public function getItem(int $index) : ?Item{
+        return $this->item[$index] ?? null;
     }
     
+    /**
+     * @return bool
+     */
     public function isReadonly() : bool{
         return $this->readonly;
     }
     
+    /**
+     * @return Item[]
+     */
     public function getContents(){
         return $this->item;
     }
     
+    /**
+     * @return string
+     */
     public function getName(){
         return $this->title;
     }
     
+    /**
+     * @return int
+     */
     public function getType() : int{
         return $this->type;
     }
     
+    /**
+     * @return Vector3
+     */
     public function getPos() : Vector3{
         return $this->position;
     }
     
+    /**
+     * Send inventory to player
+     *
+     * @param Player $player 
+     */
     public function send(Player $player){
         $pos = clone $player->floor()->add(0, 4);
         $this->position = $pos;
@@ -73,13 +128,16 @@ class InventoryMenu implements InventoryTypes{
         foreach($this->item as $k => $i){
             $inv->setItem($k, $i);
         }
-        $tag = new CompoundTag();
-        $tag->setString('CustomName', $this->getName());
-        IMU::sendTagData($player, $tag, $pos);
         InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new PrepareSendTask($player, $this, $inv), 5);
     }
     
+    /**
+     * Close inventory if player is opening
+     *
+     * @param Player $player 
+     */
     public function close(Player $player){
+        if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
         InventoryMenuAPI::unsetData($player);
         IMU::sendFakeBlock($player, $this->getPos(), BlockIds::AIR);
         if($this->getType() === InventoryTypes::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendFakeBlock($player, $this->getPos()->add(1), BlockIds::AIR);
@@ -92,6 +150,9 @@ class InventoryMenu implements InventoryTypes{
         $pos = $this->getPos();
         IMU::sendFakeBlock($player, $pos, IMU::getInventoryBlockId($this->getType()));
         if($this->getType() === InventoryTypes::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendPairData($player, $pos, $this->getType());
+        $tag = new CompoundTag();
+        $tag->setString('CustomName', $this->getName());
+        IMU::sendTagData($player, $tag, $pos);
     }
     
     /**
