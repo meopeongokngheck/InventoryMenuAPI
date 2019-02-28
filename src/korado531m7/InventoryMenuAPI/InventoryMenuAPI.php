@@ -35,18 +35,30 @@ class InventoryMenuAPI extends PluginBase{
         return array_key_exists($player->getName(), self::$inventoryMenuVar);
     }
     
+    /**
+     * this function is for internal use only. Don't call this
+     */
     public static function unsetData(Player $player){
         unset(self::$inventoryMenuVar[$player->getName()]);
     }
     
+    /**
+     * this function is for internal use only. Don't call this
+     */
     public static function getData(Player $player) : array{
         return self::$inventoryMenuVar[$player->getName()] ?? [];
     }
     
+    /**
+     * this function is for internal use only. Don't call this
+     */
     public static function setData(Player $player, InventoryMenu $menu, string $name, FakeMenuInventory $im, array $inv){
         self::$inventoryMenuVar[$player->getName()] = [$menu, $name, $im, $inv];
     }
     
+    /**
+     * this function is for internal use only. Don't call this
+     */
     public static function getPluginBase() : PluginBase{
         return self::$pluginbase;
     }
