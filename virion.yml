@@ -1,6 +1,6 @@
 name: InventoryMenuAPI
 api: [3.3.1]
 antigen: korado531m7\InventoryMenuAPI
-version: 2.0.0
+version: 2.0.3
 author: korado531m7
 php: [7.2]
