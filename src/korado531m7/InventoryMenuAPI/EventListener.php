@@ -7,6 +7,7 @@ use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 use pocketmine\Player;
 use pocketmine\event\Listener;
 use pocketmine\event\inventory\InventoryTransactionEvent;
+use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\item\ItemIds;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
@@ -14,6 +15,13 @@ use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 
 class EventListener implements Listener{
     public function __construct(){
+    }
+    
+    public function onQuit(PlayerQuitEvent $event){
+        $player = $event->getPlayer();
+        if(InventoryMenuAPI::isOpeningInventoryMenu($player)){
+            InventoryMenuAPI::unsetData($player);
+        }
     }
     
     public function onTransactionInventory(InventoryTransactionEvent $event){
@@ -33,9 +41,14 @@ class EventListener implements Listener{
             if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return true;
             $data = InventoryMenuAPI::getData($player);
             $player->getInventory()->setContents($data[3]);
-            $data[0]->close($player);
-            $ev = new InventoryCloseEvent($player, $data[2]);
+            $ev = new InventoryCloseEvent($player, $data[2], $pk->windowId);
             $ev->call();
+            if($ev->isCancelled()){
+                $data[0]->removeBlock($player);
+                $data[0]->send($player);
+            }else{
+                $data[0]->close($player);
+            }
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $action = $pk->actions[0];

@@ -98,8 +98,11 @@ here's the documentation
 ```php
 use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 ```
-* `getPlayer()`          - Return Player object who clicked
-* `getInventory()`       - Return Fake Inventory
+* `getPlayer()`                     - Return Player object who clicked
+* `getInventory()`                  - Return Fake Inventory
+* `getWindowId()`                   - Return Window Id
+* `setCancelled(bool $value)`       - To cancel, use this     (from Cancellable)
+* `isCancelled()`                   - Check whether cancelled (from Cancellable)
 
 
 

@@ -122,9 +122,8 @@ class InventoryMenu implements InventoryTypes{
      * @param Player $player 
      */
     public function send(Player $player){
-        $pos = clone $player->floor()->add(0, 4);
-        $this->position = $pos;
-        $inv = new FakeMenuInventory($pos, IMU::getInventoryWindowTypes($this->getType()), IMU::getMaxInventorySize($this->getType()), $this->getName());
+        $this->position = clone $player->floor()->add(0, 4);
+        $inv = new FakeMenuInventory($this->getPos(), IMU::getInventoryWindowTypes($this->getType()), IMU::getMaxInventorySize($this->getType()), $this->getName());
         foreach($this->item as $k => $i){
             $inv->setItem($k, $i);
         }
@@ -133,12 +132,19 @@ class InventoryMenu implements InventoryTypes{
     
     /**
      * Close inventory if player is opening
-     *
-     * @param Player $player 
+     * 
+     * @param Player $player
      */
     public function close(Player $player){
         if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
+        $this->removeBlock($player);
         InventoryMenuAPI::unsetData($player);
+    }
+    
+    /**
+     * this function is for internal use only. Don't call this
+     */
+    public function removeBlock(Player $player){
         IMU::sendFakeBlock($player, $this->getPos(), BlockIds::AIR);
         if($this->getType() === InventoryTypes::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendFakeBlock($player, $this->getPos()->add(1), BlockIds::AIR);
     }
