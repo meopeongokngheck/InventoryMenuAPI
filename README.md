@@ -75,9 +75,9 @@ $inv->close($player); //$player is player object who is opening inventory menu
 ### DEALING WITH EVENT
 This api will call event and you can use that!
 
-**WHEN CLICKED ITEMS**
+**WHEN CLICK ITEM**
 
-You can use event when player clicked items
+You can use event when player clicked items.
 it's InventoryClickEvent
 here's the documentation
 ```php
@@ -88,6 +88,18 @@ use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
 * `getInventory()`       - Return Fake Inventory
 * `getAction()`          - Return NetworkInventoryAction
 * `getTransactionType()` - Return integer
+
+
+**WHEN CLOSE INVENTORY MENU**
+
+You can use event when player close inventory.
+it's InventoryCloseEvent
+here's the documentation
+```php
+use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
+```
+* `getPlayer()`          - Return Player object who clicked
+* `getInventory()`       - Return Fake Inventory
 
 
 

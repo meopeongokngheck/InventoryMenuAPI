@@ -15,9 +15,10 @@ class InventoryClickEvent extends PluginEvent{
     protected $transaction;
     
     /**
-     * @param Player            $who
-     * @param Item              $item
-     * @param FakeMenuInventory $inventory
+     * @param Player                     $who
+     * @param Item                       $item
+     * @param InventoryTransactionPacket $transaction
+     * @param FakeMenuInventory          $inventory
      */
     public function __construct(Player $who, Item $item, InventoryTransactionPacket $transaction, FakeMenuInventory $inventory){
         $this->who = $who;

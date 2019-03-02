@@ -2,6 +2,7 @@
 namespace korado531m7\InventoryMenuAPI;
 
 use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
+use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 
 use pocketmine\Player;
 use pocketmine\event\Listener;
@@ -33,6 +34,8 @@ class EventListener implements Listener{
             $data = InventoryMenuAPI::getData($player);
             $player->getInventory()->setContents($data[3]);
             $data[0]->close($player);
+            $ev = new InventoryCloseEvent($player, $data[2]);
+            $ev->call();
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $action = $pk->actions[0];
