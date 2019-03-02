@@ -12,8 +12,6 @@ use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 
 class EventListener implements Listener{
-    private $plugin;
-    
     public function __construct(){
     }
     
