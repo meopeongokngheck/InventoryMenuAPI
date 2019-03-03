@@ -15,6 +15,6 @@ class PrepareSendTask extends Task{
     
     public function onRun(int $tick) : void{
         $this->menu->sendFakeBlock($this->player);
-        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new SendInventoryTask($this->player, $this->menu, $this->inventory), 5);
+        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new SendInventoryTask($this->player, $this->menu, $this->inventory), 3);
     }
 }
