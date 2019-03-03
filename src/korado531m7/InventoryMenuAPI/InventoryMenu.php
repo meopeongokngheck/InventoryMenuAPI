@@ -127,7 +127,7 @@ class InventoryMenu implements InventoryTypes{
         foreach($this->item as $k => $i){
             $inv->setItem($k, $i);
         }
-        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new PrepareSendTask($player, clone $this, clone $inv), 2);
+        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new PrepareSendTask($player, clone $this, clone $inv), 4);
     }
     
     /**

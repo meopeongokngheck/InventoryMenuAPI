@@ -6,7 +6,6 @@ use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 
 use pocketmine\Player;
 use pocketmine\event\Listener;
-use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\item\ItemIds;
@@ -24,23 +23,12 @@ class EventListener implements Listener{
         }
     }
     
-    public function onTransactionInventory(InventoryTransactionEvent $event){
-        $object = $event->getTransaction()->getSource();
-        if($object instanceof Player){
-            if(InventoryMenuAPI::isOpeningInventoryMenu($object)){
-                $data = InventoryMenuAPI::getData($object);
-                $object->getInventory()->setContents($data[3]);
-            }
-        }
-    }
-    
     public function onReceive(DataPacketReceiveEvent $event){
         $pk = $event->getPacket();
         $player = $event->getPlayer();
         if($pk instanceof ContainerClosePacket){
             if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return true;
             $data = InventoryMenuAPI::getData($player);
-            $player->getInventory()->setContents($data[3]);
             $ev = new InventoryCloseEvent($player, $data[2], $pk->windowId);
             $ev->call();
             if($ev->isCancelled()){
@@ -58,6 +46,8 @@ class EventListener implements Listener{
                     $data[0]->close($player);
                     $ev = new InventoryClickEvent($player, $itemresult, $pk, $data[2]);
                     $ev->call();
+                    $player->getInventory()->setContents($data[3]);
+                    $event->setCancelled();
                 }
             }
         }
