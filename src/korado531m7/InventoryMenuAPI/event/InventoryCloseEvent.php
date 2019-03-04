@@ -15,6 +15,7 @@ class InventoryCloseEvent extends PluginEvent implements Cancellable{
     /**
      * @param Player            $who
      * @param FakeMenuInventory $inventory
+     * @param int               $windowId
      */
     public function __construct(Player $who, FakeMenuInventory $inventory, int $windowId){
         $this->who = $who;

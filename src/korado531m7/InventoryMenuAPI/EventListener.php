@@ -27,7 +27,7 @@ class EventListener implements Listener{
         $pk = $event->getPacket();
         $player = $event->getPlayer();
         if($pk instanceof ContainerClosePacket){
-            if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return true;
+            if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
             $data = InventoryMenuAPI::getData($player);
             $ev = new InventoryCloseEvent($player, $data[2], $pk->windowId);
             $ev->call();
@@ -39,12 +39,12 @@ class EventListener implements Listener{
             }
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
-                $action = $pk->actions[0];
                 $data = InventoryMenuAPI::getData($player);
                 if($data[0]->isReadonly()){
-                    $itemresult = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
+                    $action = $pk->actions[0];
+                    $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
                     $data[0]->close($player);
-                    $ev = new InventoryClickEvent($player, $itemresult, $pk, $data[2]);
+                    $ev = new InventoryClickEvent($player, $item, $pk, $data[2]);
                     $ev->call();
                     $player->getInventory()->setContents($data[3]);
                     $event->setCancelled();
