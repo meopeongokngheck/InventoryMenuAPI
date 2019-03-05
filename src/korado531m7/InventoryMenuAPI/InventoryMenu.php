@@ -137,6 +137,8 @@ class InventoryMenu implements InventoryTypes{
      */
     public function close(Player $player){
         if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
+        $data = InventoryMenuAPI::getData($player);
+        $player->removeWindow($data[2]);
         $this->removeBlock($player);
         InventoryMenuAPI::unsetData($player);
     }
