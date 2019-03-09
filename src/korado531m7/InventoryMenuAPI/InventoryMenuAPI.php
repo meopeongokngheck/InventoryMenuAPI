@@ -27,6 +27,17 @@ class InventoryMenuAPI extends PluginBase{
     }
     
     /**
+     * Create inventory instance function
+     *
+     * @param int $type
+     *
+     * @return InventoryMenu
+     */
+    public static function createInventory(int $type = InventoryTypes:: INVENTORY_TYPE_CHEST) : InventoryMenu{
+        return new InventoryMenu($type);
+    }
+    
+    /**
      * Check whether player is opening inventory menu
      *
      * @param  Player $player

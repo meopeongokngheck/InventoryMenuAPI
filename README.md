@@ -26,7 +26,9 @@ these items will be set on inventory menu
 To send inventory menu, create InventoryMenu instance
 ```php
 $inv = new InventoryMenu();
+$inv = InventoryMenuAPI::createInventory();
 ```
+(you don't have to write importing class InventoryMenu if you use createInventory function)
 
 then, call send function
 ```php
@@ -60,6 +62,7 @@ const INVENTORY_TYPE_COMMAND_BLOCK = 11;
 
 //Example:
 $inv = new InventoryMenu(InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE);
+$inv = InventoryMenuAPI::createInventory(InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE);
 ```
 These constants are written in `korado531m7\InventoryMenuAPI\InventoryTypes` interface
 
@@ -69,6 +72,17 @@ These constants are written in `korado531m7\InventoryMenuAPI\InventoryTypes` int
 To close inventory menu, use close function
 ```php
 $inv->close($player); //$player is player object who is opening inventory menu
+```
+
+
+**WRITING CODE IN A ROW**
+You can write code in a row.
+```php
+//Ex1
+(new InventoryMenu())->setName('Test')->send($player);
+
+//Ex2
+InventoryMenuAPI::createInventory()->setName('Test')->send($player);
 ```
 
 
