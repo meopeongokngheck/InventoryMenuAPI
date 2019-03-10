@@ -2,7 +2,7 @@
 namespace korado531m7\InventoryMenuAPI;
 
 use korado531m7\InventoryMenuAPI\inventory\FakeMenuInventory;
-use korado531m7\InventoryMenuAPI\task\PrepareSendTask;
+use korado531m7\InventoryMenuAPI\task\SendTask;
 use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils as IMU;
 
 use pocketmine\Player;
@@ -127,7 +127,7 @@ class InventoryMenu implements InventoryTypes{
         foreach($this->item as $k => $i){
             $inv->setItem($k, $i);
         }
-        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new PrepareSendTask($player, clone $this, clone $inv), 4);
+        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new SendTask($player, clone $this, clone $inv), 4);
     }
     
     /**

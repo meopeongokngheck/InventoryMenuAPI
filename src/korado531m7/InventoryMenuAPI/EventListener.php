@@ -41,9 +41,9 @@ class EventListener implements Listener{
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $data = InventoryMenuAPI::getData($player);
                 if($data[0]->isReadonly()){
+                    $data[0]->close($player);
                     $action = $pk->actions[0];
                     $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
-                    $data[0]->close($player);
                     $ev = new InventoryClickEvent($player, $item, $pk, $data[2]);
                     $ev->call();
                     $player->getInventory()->setContents($data[3]);
