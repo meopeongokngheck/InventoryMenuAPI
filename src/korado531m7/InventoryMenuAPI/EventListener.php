@@ -40,15 +40,14 @@ class EventListener implements Listener{
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $data = InventoryMenuAPI::getData($player);
+                $action = $pk->actions[0];
                 if($data[0]->isReadonly()){
                     $data[0]->close($player);
-                    $action = $pk->actions[0];
-                    $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
-                    $ev = new InventoryClickEvent($player, $item, $pk, $data[2]);
-                    $ev->call();
                     $player->getInventory()->setContents($data[3]);
                     $event->setCancelled();
                 }
+                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $data[2]);
+                $ev->call();
             }
         }
     }
