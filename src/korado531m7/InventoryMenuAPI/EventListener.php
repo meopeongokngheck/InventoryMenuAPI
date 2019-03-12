@@ -26,8 +26,7 @@ class EventListener implements Listener{
     public function onReceive(DataPacketReceiveEvent $event){
         $pk = $event->getPacket();
         $player = $event->getPlayer();
-        if($pk instanceof ContainerClosePacket){
-            if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
+        if($pk instanceof ContainerClosePacket && InventoryMenuAPI::isOpeningInventoryMenu($player)){
             $data = InventoryMenuAPI::getData($player);
             $ev = new InventoryCloseEvent($player, $data[2], $pk->windowId);
             $ev->call();
