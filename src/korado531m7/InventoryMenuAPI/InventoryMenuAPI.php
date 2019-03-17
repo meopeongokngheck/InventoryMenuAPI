@@ -7,7 +7,11 @@ use pocketmine\plugin\PluginBase;
 
 class InventoryMenuAPI extends PluginBase{
     private static $inventoryMenuVar = [];
-    private static $pluginbase = null; //PLUGINBASE
+    private static $pluginbase = null;
+    
+    const TEMP_IM_INSTANCE = 0;
+    const TEMP_FMINV_INSTANCE = 1;
+    const TEMP_INV_CONTENTS = 2;
     
     public function onEnable(){
         self::register($this);
@@ -27,7 +31,7 @@ class InventoryMenuAPI extends PluginBase{
     }
     
     /**
-     * Create inventory instance function
+     * Create inventory instance
      *
      * @param int $type
      *
@@ -64,8 +68,8 @@ class InventoryMenuAPI extends PluginBase{
     /**
      * this function is for internal use only. Don't call this
      */
-    public static function setData(Player $player, InventoryMenu $menu, string $name, FakeMenuInventory $im, array $inv){
-        self::$inventoryMenuVar[$player->getName()] = [$menu, $name, $im, $inv];
+    public static function setData(Player $player, InventoryMenu $menu, FakeMenuInventory $im, array $inv){
+        self::$inventoryMenuVar[$player->getName()] = [$menu, $im, $inv];
     }
     
     /**

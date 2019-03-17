@@ -1,6 +1,7 @@
 <?php
 namespace korado531m7\InventoryMenuAPI;
 
+use korado531m7\InventoryMenuAPI\InventoryMenuAPI as IM;
 use korado531m7\InventoryMenuAPI\inventory\FakeMenuInventory;
 use korado531m7\InventoryMenuAPI\task\SendTask;
 use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils as IMU;
@@ -18,7 +19,7 @@ class InventoryMenu implements InventoryTypes{
     private $position;
     private $readonly = true;
     
-    public function __construct(int $type = InventoryTypes::INVENTORY_TYPE_CHEST){
+    public function __construct(int $type = self::INVENTORY_TYPE_CHEST){
         $this->type = $type;
         $this->title = IMU::getDefaultInventoryName($type);
     }
@@ -124,9 +125,7 @@ class InventoryMenu implements InventoryTypes{
     public function send(Player $player){
         $this->position = clone $player->floor()->add(0, 4);
         $inv = new FakeMenuInventory($this->getPos(), IMU::getInventoryWindowTypes($this->getType()), IMU::getMaxInventorySize($this->getType()), $this->getName());
-        foreach($this->item as $k => $i){
-            $inv->setItem($k, $i);
-        }
+        $inv->setContents($this->item);
         InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new SendTask($player, clone $this, clone $inv), 4);
     }
     
@@ -138,7 +137,7 @@ class InventoryMenu implements InventoryTypes{
     public function close(Player $player){
         if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
         $data = InventoryMenuAPI::getData($player);
-        $player->removeWindow($data[2]);
+        $player->removeWindow($data[IM::TEMP_FMINV_INSTANCE]);
         $this->removeBlock($player);
         InventoryMenuAPI::unsetData($player);
     }
@@ -148,7 +147,7 @@ class InventoryMenu implements InventoryTypes{
      */
     public function removeBlock(Player $player){
         IMU::sendFakeBlock($player, $this->getPos(), BlockIds::AIR);
-        if($this->getType() === InventoryTypes::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendFakeBlock($player, $this->getPos()->add(1), BlockIds::AIR);
+        if($this->getType() === self::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendFakeBlock($player, $this->getPos()->add(1), BlockIds::AIR);
     }
     
     /**
@@ -157,7 +156,7 @@ class InventoryMenu implements InventoryTypes{
     public function sendFakeBlock(Player $player){
         $pos = $this->getPos();
         IMU::sendFakeBlock($player, $pos, IMU::getInventoryBlockId($this->getType()));
-        if($this->getType() === InventoryTypes::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendPairData($player, $pos, $this->getType());
+        if($this->getType() === self::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendPairData($player, $pos, $this->getType());
         $tag = new CompoundTag();
         $tag->setString('CustomName', $this->getName());
         IMU::sendTagData($player, $tag, $pos);
@@ -166,7 +165,7 @@ class InventoryMenu implements InventoryTypes{
     /**
      * this function is for internal use only. Don't call this
      */
-    public function setData(Player $player, $inv){
-        InventoryMenuAPI::setData($player, $this, $this->getName(), $inv, $player->getInventory()->getContents());
+    public function setData(Player $player, FakeMenuInventory $inv){
+        InventoryMenuAPI::setData($player, $this, $inv, $player->getInventory()->getContents());
     }
 }

@@ -49,7 +49,7 @@ class InventoryClickEvent extends PluginEvent{
     }
     
     /**
-     * @return NetworkInventoryAction
+     * @return NetworkInventoryAction[]
      */
     public function getActions() : array{
         return $this->transaction->actions;
