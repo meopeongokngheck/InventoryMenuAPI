@@ -30,7 +30,7 @@ class EventListener implements Listener{
         if($pk instanceof ContainerClosePacket && InventoryMenuAPI::isOpeningInventoryMenu($player)){
             $instance = $data[IM::TEMP_IM_INSTANCE];
             $data = InventoryMenuAPI::getData($player);
-            $ev = new InventoryCloseEvent($player, $instance, $pk->windowId);
+            $ev = new InventoryCloseEvent($player, $data[IM::TEMP_FMINV_INSTANCE], $pk->windowId);
             $ev->call();
             if($ev->isCancelled()){
                 $instance->removeBlock($player);
@@ -41,14 +41,14 @@ class EventListener implements Listener{
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $data = InventoryMenuAPI::getData($player);
-                $instance = $data[IM::TEMP_FMINV_INSTANCE];
+                $instance = $data[IM::TEMP_INV_INSTANCE];
                 $action = $pk->actions[0];
                 if($instance->isReadonly()){
                     $instance->close($player);
                     $player->getInventory()->setContents($data[IM::TEMP_INV_CONTENTS]);
                     $event->setCancelled();
                 }
-                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $instance);
+                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $data[IM::TEMP_FMINV_INSTANCE]);
                 $ev->call();
                 if($instance->getCallable() !== null){
                     call_user_func_array($instance->getCallable(), [$player, $instance]);
