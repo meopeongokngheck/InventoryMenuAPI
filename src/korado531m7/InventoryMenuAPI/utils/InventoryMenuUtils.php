@@ -11,14 +11,14 @@ use pocketmine\block\BlockIds;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
+use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 
 class InventoryMenuUtils{
     public static function sendTagData(Player $player, CompoundTag $tag, Vector3 $pos){
         $writer = new NetworkLittleEndianNBTStream();
-        $pk = new BlockEntityDataPacket;
+        $pk = new BlockActorDataPacket;
         $pk->x = $pos->x;
         $pk->y = $pos->y;
         $pk->z = $pos->z;

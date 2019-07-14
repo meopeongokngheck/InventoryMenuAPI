@@ -28,26 +28,31 @@ class EventListener implements Listener{
         $pk = $event->getPacket();
         $player = $event->getPlayer();
         if($pk instanceof ContainerClosePacket && InventoryMenuAPI::isOpeningInventoryMenu($player)){
+            $instance = $data[IM::TEMP_IM_INSTANCE];
             $data = InventoryMenuAPI::getData($player);
-            $ev = new InventoryCloseEvent($player, $data[IM::TEMP_FMINV_INSTANCE], $pk->windowId);
+            $ev = new InventoryCloseEvent($player, $instance, $pk->windowId);
             $ev->call();
             if($ev->isCancelled()){
-                $data[IM::TEMP_IM_INSTANCE]->removeBlock($player);
-                $data[IM::TEMP_IM_INSTANCE]->send($player);
+                $instance->removeBlock($player);
+                $instance->send($player);
             }else{
-                $data[IM::TEMP_IM_INSTANCE]->close($player);
+                $instance->close($player);
             }
         }elseif($pk instanceof InventoryTransactionPacket){
             if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
                 $data = InventoryMenuAPI::getData($player);
+                $instance = $data[IM::TEMP_FMINV_INSTANCE];
                 $action = $pk->actions[0];
-                if($data[IM::TEMP_IM_INSTANCE]->isReadonly()){
-                    $data[IM::TEMP_IM_INSTANCE]->close($player);
+                if($instance->isReadonly()){
+                    $instance->close($player);
                     $player->getInventory()->setContents($data[IM::TEMP_INV_CONTENTS]);
                     $event->setCancelled();
                 }
-                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $data[IM::TEMP_FMINV_INSTANCE]);
+                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $instance);
                 $ev->call();
+                if($instance->getCallable() !== null){
+                    call_user_func_array($instance->getCallable(), [$player, $instance]);
+                }
             }
         }
     }

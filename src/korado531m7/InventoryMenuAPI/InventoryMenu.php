@@ -18,7 +18,8 @@ class InventoryMenu implements InventoryTypes{
     private $item = [];
     private $position;
     private $readonly = true;
-    
+    private $callable = null;
+
     public function __construct(int $type = self::INVENTORY_TYPE_CHEST){
         $this->type = $type;
         $this->title = IMU::getDefaultInventoryName($type);
@@ -34,6 +35,18 @@ class InventoryMenu implements InventoryTypes{
      */
     public function setItem(int $index, Item $item) : InventoryMenu{
         $this->item[$index] = $item;
+        return $this;
+    }
+
+    /**
+     * Set callable and will be called when player clicked
+     *
+     * @param callable $callable
+     *
+     * @return InventoryMenu
+     */
+    public function setCallable(callable $callable) : InventoryMenu{
+        $this->callable = $callable;
         return $this;
     }
     
@@ -72,7 +85,16 @@ class InventoryMenu implements InventoryTypes{
         $this->readonly = $value;
         return $this;
     }
-    
+
+    /**
+     * Get callable
+     *
+     * @return callable|null
+     */
+    public function getCallable() : ?callable{
+        return $this->callable;
+    }
+
     /**
      * Get item from specific index
      *
