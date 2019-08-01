@@ -31,7 +31,10 @@ class EventListener implements Listener{
         $tmpData = InventoryMenu::getData($player);
         if($tmpData === null) return;
         $inventory = $tmpData->getMenuInventory();
-        InventoryMenu::getPluginBase()->getScheduler()->cancelTask($inventory->getTask()->getTaskId());
+        $task = $inventory->getTask();
+        if($task !== null){
+            InventoryMenu::getPluginBase()->getScheduler()->cancelTask($task->getTaskId());
+        }
         switch(true){
             case $pk instanceof ContainerClosePacket:
                 $ev = new InventoryCloseEvent($player, $inventory, $pk->windowId);
