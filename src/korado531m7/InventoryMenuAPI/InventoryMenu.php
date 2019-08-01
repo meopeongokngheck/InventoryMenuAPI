@@ -1,193 +1,79 @@
 <?php
 namespace korado531m7\InventoryMenuAPI;
 
-use korado531m7\InventoryMenuAPI\InventoryMenuAPI as IM;
-use korado531m7\InventoryMenuAPI\inventory\FakeMenuInventory;
-use korado531m7\InventoryMenuAPI\task\SendTask;
-use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils as IMU;
+use korado531m7\InventoryMenuAPI\inventory\MenuInventory;
+use korado531m7\InventoryMenuAPI\utils\TemporaryData;
 
 use pocketmine\Player;
-use pocketmine\block\BlockIds;
-use pocketmine\item\Item;
-use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\plugin\PluginBase;
 
-class InventoryMenu implements InventoryTypes{
-    private $title;
-    private $type;
-    private $item = [];
-    private $position;
-    private $readonly = true;
-    private $callable = null;
-
-    public function __construct(int $type = self::INVENTORY_TYPE_CHEST){
-        $this->type = $type;
-        $this->title = IMU::getDefaultInventoryName($type);
+class InventoryMenu extends PluginBase implements InventoryType{
+    private static $tmpInventory = [];
+    private static $pluginbase = null;
+    
+    public function onEnable(){
+        self::register($this);
+        $this->getLogger()->notice('You are using this api as plugin. We recommend you to use this as virion');
     }
     
     /**
-     * Set item to specific index
+     * You need to call this function statically to use this api
      *
-     * @param int  $index
-     * @param Item $item
-     *
-     * @return InventoryMenu
+     * @param PluginBase $plugin
      */
-    public function setItem(int $index, Item $item) : InventoryMenu{
-        $this->item[$index] = $item;
-        return $this;
-    }
-
-    /**
-     * Set callable and will be called when player clicked
-     *
-     * @param callable $callable
-     *
-     * @return InventoryMenu
-     */
-    public function setCallable(callable $callable) : InventoryMenu{
-        $this->callable = $callable;
-        return $this;
+    public static function register(PluginBase $plugin) : void{
+        if(self::$pluginbase === null){
+            self::$pluginbase = $plugin;
+            $plugin->getServer()->getPluginManager()->registerEvents(new EventListener(), $plugin);
+        }
     }
     
     /**
-     * Set items
+     * Create inventory instance
      *
-     * @param Item[] $items
-     *
-     * @return InventoryMenu
-     */
-    public function setContents(array $items) : InventoryMenu{
-        $this->item = $items;
-        return $this;
-    }
-    
-    /**
-     * Set inventory name
-     *
-     * @param string $title
+     * @param int $type
      *
      * @return InventoryMenu
      */
-    public function setName(string $title) : InventoryMenu{
-        $this->title = $title;
-        return $this;
+    public static function createInventory(string $type = self::INVENTORY_TYPE_CHEST) : MenuInventory{
+        return new $type();
     }
     
     /**
-     * Enable to trade between player and inventory
+     * Check whether player is opening inventory menu
      *
-     * @param bool $value
-     *
-     * @return InventoryMenu
-     */
-    public function setReadonly(bool $value) : InventoryMenu{
-        $this->readonly = $value;
-        return $this;
-    }
-
-    /**
-     * Get callable
-     *
-     * @return callable|null
-     */
-    public function getCallable() : ?callable{
-        return $this->callable;
-    }
-
-    /**
-     * Get item from specific index
-     *
-     * @return Item|null
-     */
-    public function getItem(int $index) : ?Item{
-        return $this->item[$index] ?? null;
-    }
-    
-    /**
+     * @param  Player $player
      * @return bool
      */
-    public function isReadonly() : bool{
-        return $this->readonly;
-    }
-    
-    /**
-     * @return Item[]
-     */
-    public function getContents(){
-        return $this->item;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getName(){
-        return $this->title;
-    }
-    
-    /**
-     * @return int
-     */
-    public function getType() : int{
-        return $this->type;
-    }
-    
-    /**
-     * @return Vector3
-     */
-    public function getPos() : Vector3{
-        return $this->position;
-    }
-    
-    /**
-     * Send inventory to player
-     *
-     * @param Player $player 
-     */
-    public function send(Player $player){
-        $this->position = clone $player->floor()->add(0, 4);
-        $inv = new FakeMenuInventory($this->getPos(), IMU::getInventoryWindowTypes($this->getType()), IMU::getMaxInventorySize($this->getType()), $this->getName());
-        $inv->setContents($this->item);
-        InventoryMenuAPI::getPluginBase()->getScheduler()->scheduleDelayedTask(new SendTask($player, clone $this, clone $inv), 4);
-    }
-    
-    /**
-     * Close inventory if player is opening
-     * 
-     * @param Player $player
-     */
-    public function close(Player $player){
-        if(!InventoryMenuAPI::isOpeningInventoryMenu($player)) return;
-        $data = InventoryMenuAPI::getData($player);
-        $player->removeWindow($data[IM::TEMP_FMINV_INSTANCE]);
-        $this->removeBlock($player);
-        InventoryMenuAPI::unsetData($player);
+    public static function isOpeningInventoryMenu(Player $player) : bool{
+        return array_key_exists($player->getName(), self::$tmpInventory);
     }
     
     /**
      * this function is for internal use only. Don't call this
      */
-    public function removeBlock(Player $player){
-        IMU::sendFakeBlock($player, $this->getPos(), BlockIds::AIR);
-        if($this->getType() === self::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendFakeBlock($player, $this->getPos()->add(1), BlockIds::AIR);
+    public static function unsetData(Player $player){
+        unset(self::$tmpInventory[$player->getName()]);
     }
     
     /**
      * this function is for internal use only. Don't call this
      */
-    public function sendFakeBlock(Player $player){
-        $pos = $this->getPos();
-        IMU::sendFakeBlock($player, $pos, IMU::getInventoryBlockId($this->getType()));
-        if($this->getType() === self::INVENTORY_TYPE_DOUBLE_CHEST) IMU::sendPairData($player, $pos, $this->getType());
-        $tag = new CompoundTag();
-        $tag->setString('CustomName', $this->getName());
-        IMU::sendTagData($player, $tag, $pos);
+    public static function getData(Player $player) : ?TemporaryData{
+        return self::$tmpInventory[$player->getName()] ?? null;
     }
     
     /**
      * this function is for internal use only. Don't call this
      */
-    public function setData(Player $player, FakeMenuInventory $inv){
-        InventoryMenuAPI::setData($player, $this, $inv, $player->getInventory()->getContents());
+    public static function setData(Player $player, TemporaryData $temp){
+        self::$tmpInventory[$player->getName()] = $temp;
+    }
+    
+    /**
+     * this function is for internal use only. Don't call this
+     */
+    public static function getPluginBase() : PluginBase{
+        return self::$pluginbase;
     }
 }

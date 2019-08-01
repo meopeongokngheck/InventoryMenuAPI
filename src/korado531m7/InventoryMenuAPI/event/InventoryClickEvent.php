@@ -1,9 +1,9 @@
 <?php
 namespace korado531m7\InventoryMenuAPI\event;
 
-use korado531m7\InventoryMenuAPI\inventory\FakeMenuInventory;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use korado531m7\InventoryMenuAPI\inventory\MenuInventory;
 
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\Player;
 use pocketmine\event\plugin\PluginEvent;
 use pocketmine\item\Item;
@@ -18,13 +18,13 @@ class InventoryClickEvent extends PluginEvent{
      * @param Player                     $who
      * @param Item                       $item
      * @param InventoryTransactionPacket $transaction
-     * @param FakeMenuInventory          $inventory
+     * @param MenuInventory          $inventory
      */
-    public function __construct(Player $who, Item $item, InventoryTransactionPacket $transaction, FakeMenuInventory $inventory){
+    public function __construct(Player $who, Item $item, InventoryTransactionPacket $transaction, MenuInventory $inventory){
         $this->who = $who;
         $this->item = $item;
-        $this->inventory = $inventory;
         $this->transaction = $transaction;
+        $this->inventory = $inventory;
     }
 
     /**
@@ -41,10 +41,7 @@ class InventoryClickEvent extends PluginEvent{
         return $this->item;
     }
     
-    /**
-     * @return FakeMenuInventory
-     */
-    public function getInventory() : FakeMenuInventory{
+    public function getInventory() : MenuInventory{
         return $this->inventory;
     }
     

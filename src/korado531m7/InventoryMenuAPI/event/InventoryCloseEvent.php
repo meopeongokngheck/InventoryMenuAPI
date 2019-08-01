@@ -1,7 +1,7 @@
 <?php
 namespace korado531m7\InventoryMenuAPI\event;
 
-use korado531m7\InventoryMenuAPI\inventory\FakeMenuInventory;
+use korado531m7\InventoryMenuAPI\inventory\MenuInventory;
 
 use pocketmine\Player;
 use pocketmine\event\Cancellable;
@@ -14,10 +14,10 @@ class InventoryCloseEvent extends PluginEvent implements Cancellable{
     
     /**
      * @param Player            $who
-     * @param FakeMenuInventory $inventory
+     * @param MenuInventory $inventory
      * @param int               $windowId
      */
-    public function __construct(Player $who, FakeMenuInventory $inventory, int $windowId){
+    public function __construct(Player $who, MenuInventory $inventory, int $windowId){
         $this->who = $who;
         $this->inventory = $inventory;
         $this->windowId = $windowId;
@@ -31,9 +31,9 @@ class InventoryCloseEvent extends PluginEvent implements Cancellable{
     }
     
     /**
-     * @return FakeMenuInventory
+     * @return MenuInventory
      */
-    public function getInventory() : FakeMenuInventory{
+    public function getInventory() : MenuInventory{
         return $this->inventory;
     }
     

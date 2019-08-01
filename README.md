@@ -1,48 +1,53 @@
 # InventoryMenuAPI
-**You can create inventory menu like java version with this API!**
+**Advanced Inventory Menu API for PocketMine**
 
 ### Installation
 You can download converted to phar version file from [here](https://poggit.pmmp.io/ci/korado531m7/InventoryMenuAPI/InventoryMenuAPI)
 
-### How to use
+### Preparation
 Before using, you need to import class
 ```php
-<?php
-use korado531m7\InventoryMenuAPI\InventoryMenuAPI;
+use korado531m7\InventoryMenuAPI\InventoryMenu;
 ```
 
 If you use api as virion, you must call register function statically
 ```php
-InventoryMenuAPI::register($param); //param must be included PluginBase
+InventoryMenu::register($param); //param must be PluginBase
 ```
 
-Second, you need to define an array that include items like
+___
+
+### Sending Inventory
+First, you need to make an array that is including items
 ```php
-<?php
 $array = [3 => Item::get(4,0,1), 7 => Item::get(46,0,5), 12 => Item::get(246,0,1), 14 => Item::get(276,0,1)->setCustomName('MysterySword!')];
 ```
 these items will be set on inventory menu
 
 To send inventory menu, create InventoryMenu instance
 ```php
-$inv = new InventoryMenu();
-$inv = InventoryMenuAPI::createInventory();
+//use korado531m7\InventoryMenuAPI\inventory\ChestInventory;
+
+$inv = new ChestInventory();
+$inv = InventoryMenu::createInventory();
 ```
-(you don't have to write importing class InventoryMenu if you use createInventory function)
+(you don't have to write use sentence ChestInventory if you use createInventory function)
 
 then, call send function
 ```php
 $inv->send($player); //$player is player object
 ```
 
+___
 
 **SET READONLY (WRITABLE) INVENTORY**
 
-To enable to edit inventory, use setReadonly function (default value is true)
+To allow to trade, use setReadonly function (default value is true)
 ```php
 $inv->setReadonly(false); //boolean
 ```
 
+___
 
 **RENAMING INVENTORY MENU NAME**
 
@@ -51,40 +56,98 @@ To change inventory name, call setName function
 $inv->setName('WRITE NAME HERE');
 ```
 
+___
+
 **CHANGING INVENTORY TYPE**
 
-To change inventory type, need to place type int to first parameter when create inventory menu instance (Default: chest)
+To change inventory type, you need to create each inventory instance, or change the parameter when use createInventory function
 ```php
 //Supported list
-const INVENTORY_TYPE_CHEST = 1;const INVENTORY_TYPE_DOUBLE_CHEST = 2;const INVENTORY_TYPE_ENCHANTING_TABLE = 3;const INVENTORY_TYPE_HOPPER = 4;const INVENTORY_TYPE_BREWING_STAND = 5;const INVENTORY_TYPE_ANVIL = 6;const INVENTORY_TYPE_DISPENSER = 7;const INVENTORY_TYPE_DROPPER = 8;const INVENTORY_TYPE_BEACON = 9;const INVENTORY_TYPE_TRADING = 10;
-const INVENTORY_TYPE_COMMAND_BLOCK = 11;
-//NOTICE: Trading and command block are not supported (not implemented on PocketMine)
+const INVENTORY_TYPE_ANVIL = AnvilInventory::class;
+const INVENTORY_TYPE_BEACON = BeaconInventory::class;
+const INVENTORY_TYPE_BREWING_STAND = BrewingStandInventory::class;
+const INVENTORY_TYPE_CHEST = ChestInventory::class;
+const INVENTORY_TYPE_DISPENSER = DispenserInventory::class;
+const INVENTORY_TYPE_DOUBLE_CHEST = DoubleChestInventory::class;
+const INVENTORY_TYPE_DROPPER = DropperInventory::class;
+const INVENTORY_TYPE_ENCHANTING_TABLE = EnchantingTableInventory::class;
+const INVENTORY_TYPE_HOPPER = HopperInventory::class;
+```
 
 //Example:
-$inv = new InventoryMenu(InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE);
-$inv = InventoryMenuAPI::createInventory(InventoryTypes::INVENTORY_TYPE_ENCHANTING_TABLE);
+$inv = new EnchantingTableInventory();
+$inv = InventoryMenu::createInventory(InventoryType::INVENTORY_TYPE_ENCHANTING_TABLE);
 ```
-These constants are written in `korado531m7\InventoryMenuAPI\InventoryTypes` interface
+These constants are written in `korado531m7\InventoryMenuAPI\InventoryType`
 
+___
 
 **HOW TO CLOSE INVENTORY MENU**
 
-To close inventory menu, use close function
+To close inventory menu, use doClose function
 ```php
-$inv->close($player); //$player is player object who is opening inventory menu
+$inv->doClose($player); //$player is player object
 ```
 
+___
+
+**Set callback**
+
+you can set callable and will be called when player clicked an item or closed inventory.
+to set callback, use setCallable()
+the parameters in function is player object, inventory, clicked item
+```php
+//Ex
+$inv->setCallable(function($player, $inventory, $item){
+    $player->sendMessage('You clicked '.$item->getName());
+});
+```
+you can select whether clicked item or closed inventory in second parameter.
+constant is in `korado531m7\InventoryMenuAPI\inventory\MenuInventory`
+```
+const CALLBACL_CLICKED = 0;
+const CALLBACK_CLOSED = 1;
+```
+
+___
+
+**Set task**
+
+Since 3.0.0, you can set taskscheduler to inventory so that you can edit an inventory in spite of opening inventory.
+it will be started when player opened an inventory and will be cancelled when closed an inventory
+in version 3.0.0, you can use SCHEDULER_REPEATING.
+first, define task like
+```php
+class TestTask extends \korado531m7\InventoryMenuAPI\task\InventoryTask{
+    public function __construct(){
+    }
+    
+    public function onRun(int $currentTick){
+        $this->getInventory()->setItem(mt_rand(0, 5), Item::get(276));
+    }
+}
+```
+You can get inventory with getInventory()
+
+to set task, use setTask().
+```php
+//setTask(InventoryTask $task, int $tick, int $type = InventoryTask::SCHEDULER_REPEATING)
+$inv->setTask($task, 20); //$task must be InventoryTask
+```
+
+___
 
 **WRITING CODE IN A ROW**
 You can write code in a row.
 ```php
 //Ex1
-(new InventoryMenu())->setName('Test')->send($player);
+(new ChestInventory())->setName('Test')->send($player);
 
 //Ex2
-InventoryMenuAPI::createInventory()->setName('Test')->send($player);
+InventoryMenu::createInventory()->setName('Test')->send($player);
 ```
 
+___
 
 ### DEALING WITH EVENT
 This api will call event and you can use that!
@@ -99,10 +162,11 @@ use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
 ```
 * `getPlayer()`          - Return Player object who clicked
 * `getItem()`            - Return Item which player clicked
-* `getInventory()`       - Return Fake Inventory
+* `getInventory()`       - Return Inventory
 * `getAction()`          - Return NetworkInventoryAction
-* `getTransactionType()` - Return integer
+* `getTransactionType()` - Return transaction type
 
+___
 
 **WHEN CLOSE INVENTORY MENU**
 
@@ -113,17 +177,18 @@ here's the documentation
 use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 ```
 * `getPlayer()`                     - Return Player object who clicked
-* `getInventory()`                  - Return Fake Inventory
+* `getInventory()`                  - Return Inventory
 * `getWindowId()`                   - Return Window Id
 * `setCancelled(bool $value)`       - To cancel, use this     (from Cancellable)
 * `isCancelled()`                   - Check whether cancelled (from Cancellable)
 
-
+___
 
 ### REPORTING ISSUES
 If you found a bug or issues, please report it at 'issue'
 I'll fix that
 
+___
 
 ### More Features
 I'll make more features if have free time.

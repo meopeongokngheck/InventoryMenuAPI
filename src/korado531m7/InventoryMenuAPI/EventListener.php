@@ -1,9 +1,10 @@
 <?php
 namespace korado531m7\InventoryMenuAPI;
 
-use korado531m7\InventoryMenuAPI\InventoryMenuAPI as IM;
+use korado531m7\InventoryMenuAPI\InventoryMenu;
 use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
 use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
+use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils;
 
 use pocketmine\Player;
 use pocketmine\event\Listener;
@@ -19,41 +20,48 @@ class EventListener implements Listener{
     
     public function onQuit(PlayerQuitEvent $event){
         $player = $event->getPlayer();
-        if(InventoryMenuAPI::isOpeningInventoryMenu($player)){
-            InventoryMenuAPI::unsetData($player);
+        if(InventoryMenu::isOpeningInventoryMenu($player)){
+            InventoryMenu::unsetData($player);
         }
     }
     
     public function onReceive(DataPacketReceiveEvent $event){
         $pk = $event->getPacket();
         $player = $event->getPlayer();
-        if($pk instanceof ContainerClosePacket && InventoryMenuAPI::isOpeningInventoryMenu($player)){
-            $instance = $data[IM::TEMP_IM_INSTANCE];
-            $data = InventoryMenuAPI::getData($player);
-            $ev = new InventoryCloseEvent($player, $data[IM::TEMP_FMINV_INSTANCE], $pk->windowId);
-            $ev->call();
-            if($ev->isCancelled()){
-                $instance->removeBlock($player);
-                $instance->send($player);
-            }else{
-                $instance->close($player);
-            }
-        }elseif($pk instanceof InventoryTransactionPacket){
-            if(InventoryMenuAPI::isOpeningInventoryMenu($player) && array_key_exists(0,$pk->actions)){
-                $data = InventoryMenuAPI::getData($player);
-                $instance = $data[IM::TEMP_INV_INSTANCE];
+        $tmpData = InventoryMenu::getData($player);
+        if($tmpData === null) return;
+        $inventory = $tmpData->getMenuInventory();
+        InventoryMenu::getPluginBase()->getScheduler()->cancelTask($inventory->getTask()->getTaskId());
+        switch(true){
+            case $pk instanceof ContainerClosePacket:
+                $ev = new InventoryCloseEvent($player, $inventory, $pk->windowId);
+                $ev->call();
+                if($ev->isCancelled()){
+                    InventoryMenuUtils::removeBlock($player, $inventory->getPosition(), $inventory->isDouble());
+                    $inventory->send($player);
+                }else{
+                    $inventory->doClose($player);
+                }
+                $callable = $inventory->getCallable($inventory::CALLBACK_CLOSED);
+                if($callable !== null){
+                    call_user_func_array($callable, [$player, $inventory]);
+                }
+            break;
+            
+            case $pk instanceof InventoryTransactionPacket && array_key_exists(0, $pk->actions):
                 $action = $pk->actions[0];
-                if($instance->isReadonly()){
-                    $instance->close($player);
-                    $player->getInventory()->setContents($data[IM::TEMP_INV_CONTENTS]);
+                if($inventory->isReadonly()){
+                    $inventory->doClose($player);
                     $event->setCancelled();
                 }
-                $ev = new InventoryClickEvent($player, $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem, $pk, $data[IM::TEMP_FMINV_INSTANCE]);
-                $ev->call();
-                if($instance->getCallable() !== null){
-                    call_user_func_array($instance->getCallable(), [$player, $instance]);
+                $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
+                $callable = $inventory->getCallable($inventory::CALLBACL_CLICKED);
+                if($callable !== null){
+                    call_user_func_array($callable, [$player, $inventory, $item]);
                 }
-            }
+                $ev = new InventoryClickEvent($player, $item, $pk, $inventory);
+                $ev->call();
+            break;
         }
     }
 }
