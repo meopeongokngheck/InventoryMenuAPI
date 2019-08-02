@@ -167,7 +167,7 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
      *
      * @param Player $player
      */
-    public function send(Player $player){
+    public function send(Player $player){ //TODO: queue
         $inventory = clone $this;
         $pos = clone $player->floor()->add(0, 4);
         $inventory->setPosition($pos);
@@ -180,6 +180,10 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
         if(!InventoryMenu::isOpeningInventoryMenu($player)) return;
         $tmpData = InventoryMenu::getData($player);
         $inventory = $tmpData->getMenuInventory();
+        $task = $inventory->getTask();
+        if($task instanceof InventoryTask){
+            InventoryMenu::getPluginBase()->getScheduler()->cancelTask($task->getTaskId());
+        }
         $player->removeWindow($inventory);
         InventoryMenuUtils::removeBlock($player, $inventory->getPosition(), $inventory->isDouble());
         $player->getInventory()->setContents($tmpData->getItems());
