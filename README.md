@@ -135,7 +135,7 @@ then, set this testtask class to Task class in korado531m7\InventoryMenuAPI\task
 ```php
 $inventoryTask = new TestTask();
 $task = new Task();
-$task->setInventoryTask($task); //task class
+$task->setInventoryTask($inventoryTask); //inventorytask class
 $task->setPeriod(20); //tick
 $task->setType(Task::TASK_REPEATING); //type
 ```
