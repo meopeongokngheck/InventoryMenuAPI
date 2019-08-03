@@ -118,7 +118,8 @@ it will be started when player opened an inventory and will be cancelled when cl
 in version 3.0.0, you can use SCHEDULER_REPEATING.
 first, define task like
 ```php
-class TestTask extends \korado531m7\InventoryMenuAPI\task\InventoryTask{
+use korado531m7\InventoryMenuAPI\task\InventoryTask;
+class TestTask extends InventoryTask{
     public function __construct(){
     }
     
@@ -129,10 +130,25 @@ class TestTask extends \korado531m7\InventoryMenuAPI\task\InventoryTask{
 ```
 You can get inventory with getInventory()
 
-to set task, use setTask().
+then, set this testtask class to Task class in korado531m7\InventoryMenuAPI\task\Task;
 ```php
-//setTask(InventoryTask $task, int $tick, int $type = InventoryTask::SCHEDULER_REPEATING)
-$inv->setTask($task, 20); //$task must be InventoryTask
+$inventoryTask = new TestTask();
+$task = new Task();
+$task->setInventoryTask($task); //task class
+$task->setPeriod(20); //tick
+$task->setType(Task::TASK_REPEATING); //type
+```
+to set another type, use these constant
+```
+const TASK_NORMAL = 0;
+const TASK_REPEATING = 1;
+const TASK_DELAYED = 2;
+const TASK_DELAYED_REPEATING = 3;
+```
+
+to set task, use setTask()
+```php
+$inv->setTask($task); //$task must be korado531m7\InventoryMenuAPI\task\Task
 ```
 
 ___

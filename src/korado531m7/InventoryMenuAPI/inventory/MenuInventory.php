@@ -2,8 +2,8 @@
 namespace korado531m7\InventoryMenuAPI\inventory; 
 
 use korado531m7\InventoryMenuAPI\InventoryMenu;
-use korado531m7\InventoryMenuAPI\task\InventoryTask;
 use korado531m7\InventoryMenuAPI\task\InventorySendTask;
+use korado531m7\InventoryMenuAPI\task\Task;
 use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils;
 use korado531m7\InventoryMenuAPI\utils\TemporaryData;
 
@@ -21,8 +21,6 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
     protected $position;
     
     private $task = null;
-    private $taskType;
-    private $tick;
     
     private $closeCallable = null;
     private $clickCallable = null;
@@ -62,12 +60,10 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
     }
     
     /**
-     * @param InventoryTask $task
+     * @param Task $task
      */
-    public function setTask(InventoryTask $task, int $tick, int $type = InventoryTask::SCHEDULER_REPEATING){
+    public function setTask(Task $task){
         $this->task = $task;
-        $this->taskType = $type;
-        $this->tick = $tick;
         return $this;
     }
     
@@ -112,24 +108,10 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
     }
     
     /**
-     * @return InventoryTask|null
+     * @return Task|null
      */
-    public function getTask() : ?InventoryTask{
+    public function getTask() : ?Task{
         return $this->task;
-    }
-    
-    /**
-     * @return int
-     */
-    public function getTick() : int{
-        return $this->tick;
-    }
-    
-    /**
-     * @return int
-     */
-    public function getTaskType() : int{
-        return $this->taskType;
     }
     
     /**
@@ -181,8 +163,8 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
         $tmpData = InventoryMenu::getData($player);
         $inventory = $tmpData->getMenuInventory();
         $task = $inventory->getTask();
-        if($task instanceof InventoryTask){
-            InventoryMenu::getPluginBase()->getScheduler()->cancelTask($task->getTaskId());
+        if($task instanceof Task){
+            InventoryMenu::getPluginBase()->getScheduler()->cancelTask($task->getInventoryTask()->getTaskId());
         }
         $player->removeWindow($inventory);
         InventoryMenuUtils::removeBlock($player, $inventory->getPosition(), $inventory->isDouble());

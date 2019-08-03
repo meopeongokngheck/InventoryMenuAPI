@@ -5,18 +5,14 @@ use korado531m7\InventoryMenuAPI\inventory\MenuInventory;
 
 use pocketmine\scheduler\Task;
 
-abstract class InventoryTask extends Task{
-    const SCHEDULER_REPEATING = 0;
-    
-    protected $type;
+/**
+ * to set task with setTask, task class need to be inherited this.
+ */
+abstract class InventoryTask extends Task{    
     protected $inventory;
     
     public function __construct(){
         
-    }
-    
-    public function setType(int $type){
-        $this->type = $type;
     }
     
     /**

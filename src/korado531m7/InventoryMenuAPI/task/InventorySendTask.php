@@ -3,14 +3,15 @@ namespace korado531m7\InventoryMenuAPI\task;
 
 use korado531m7\InventoryMenuAPI\InventoryMenu;
 use korado531m7\InventoryMenuAPI\task\InventoryTask;
+use korado531m7\InventoryMenuAPI\task\Task;
 use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils;
 use korado531m7\InventoryMenuAPI\utils\TemporaryData;
 
 use pocketmine\Player;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\scheduler\Task;
+use pocketmine\scheduler\Task as BaseTask;
 
-class InventorySendTask extends Task{
+class InventorySendTask extends BaseTask{
     private $player, $inventory;
     
     public function __construct(Player $player, TemporaryData $tmpData){
@@ -31,15 +32,26 @@ class InventorySendTask extends Task{
         InventoryMenu::setData($this->player, $this->temp);
         $this->player->addWindow($this->inventory);
         $task = $this->inventory->getTask();
-        if($task !== null){
-            $pb = InventoryMenu::getPluginBase();
-            switch($this->inventory->getTaskType()){
-                case InventoryTask::SCHEDULER_REPEATING:
-                    $task->setInventory($this->inventory);
-                    $pb->getScheduler()->scheduleRepeatingTask($task, $this->inventory->getTick());
+        if($task instanceof Task){
+            $scheduler = InventoryMenu::getPluginBase()->getScheduler();
+            $inventoryTask = $task->getInventoryTask();
+            $inventoryTask->setInventory($this->inventory);
+            switch($task->getType()){
+                case Task::TASK_NORMAL:
+                    $scheduler->scheduleTask($inventoryTask);
                 break;
                 
-                //TODO
+                case Task::TASK_REPEATING:
+                    $scheduler->scheduleRepeatingTask($inventoryTask, $task->getPeriod());
+                break;
+                
+                case Task::TASK_DELAYED:
+                    $scheduler->scheduleDelayedTask($inventoryTask, $task->getDelay());
+                break;
+                
+                case Task::TASK_DELAYED_REPEATING:
+                    $scheduler->scheduleDelayedRepeatingTask($inventoryTask, $task->getDelay(), $task->getPeriod());
+                break;
             }
         }
     }
