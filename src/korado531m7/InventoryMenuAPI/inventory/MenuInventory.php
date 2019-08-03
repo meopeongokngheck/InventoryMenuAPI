@@ -15,7 +15,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 
 abstract class MenuInventory extends ContainerInventory implements WindowTypes{
-    const CALLBACL_CLICKED = 0;
+    const CALLBACK_CLICKED = 0;
     const CALLBACK_CLOSED = 1;
     
     protected $position;
@@ -52,8 +52,8 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
      * 
      * @return MenuInventory
      */
-    public function setCallable(callable $callable, int $type = self::CALLBACL_CLICKED){
-        if($type === self::CALLBACL_CLICKED)
+    public function setCallable(callable $callable, int $type = self::CALLBACK_CLICKED){
+        if($type === self::CALLBACK_CLICKED)
             $this->clickCallable = $callable;
         elseif($type === self::CALLBACK_CLOSED)
             $this->closeCallable = $callable;
@@ -105,7 +105,7 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
      * @return callable|null
      */
     public function getCallable(int $type) : ?callable{
-        if($type === self::CALLBACL_CLICKED)
+        if($type === self::CALLBACK_CLICKED)
             return $this->clickCallable;
         elseif($type === self::CALLBACK_CLOSED)
             return $this->closeCallable;

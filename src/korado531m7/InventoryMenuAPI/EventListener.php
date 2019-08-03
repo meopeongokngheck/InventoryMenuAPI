@@ -54,7 +54,7 @@ class EventListener implements Listener{
                     $event->setCancelled();
                 }
                 $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
-                $callable = $inventory->getCallable($inventory::CALLBACL_CLICKED);
+                $callable = $inventory->getCallable($inventory::CALLBACK_CLICKED);
                 if($callable !== null){
                     call_user_func_array($callable, [$player, $inventory, $item]);
                 }
