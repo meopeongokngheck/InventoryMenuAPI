@@ -74,6 +74,7 @@ const INVENTORY_TYPE_ENCHANTING_TABLE = EnchantingTableInventory::class;
 const INVENTORY_TYPE_HOPPER = HopperInventory::class;
 ```
 
+```php
 //Example:
 $inv = new EnchantingTableInventory();
 $inv = InventoryMenu::createInventory(InventoryType::INVENTORY_TYPE_ENCHANTING_TABLE);
@@ -105,7 +106,7 @@ $inv->setCallable(function($player, $inventory, $item){
 you can select whether clicked item or closed inventory in second parameter.
 constant is in `korado531m7\InventoryMenuAPI\inventory\MenuInventory`
 ```
-const CALLBACL_CLICKED = 0;
+const CALLBACK_CLICKED = 0;
 const CALLBACK_CLOSED = 1;
 ```
 
