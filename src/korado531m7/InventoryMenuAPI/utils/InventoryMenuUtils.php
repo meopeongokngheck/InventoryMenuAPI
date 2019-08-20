@@ -3,7 +3,6 @@ namespace korado531m7\InventoryMenuAPI\utils;
 
 use pocketmine\Player;
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
@@ -35,7 +34,7 @@ class InventoryMenuUtils{
         $pk->y = (int) $pos->y;
         $pk->z = (int) $pos->z;
         $pk->flags = UpdateBlockPacket::FLAG_ALL;
-        $pk->blockRuntimeId = BlockFactory::toStaticRuntimeId($block->getId(), $block->getDamage());
+        $pk->blockRuntimeId = $block->getRuntimeId();
         $player->dataPacket($pk);
     }
     
