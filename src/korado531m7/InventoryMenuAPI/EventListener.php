@@ -5,12 +5,14 @@ use korado531m7\InventoryMenuAPI\InventoryMenu;
 use korado531m7\InventoryMenuAPI\event\InventoryClickEvent;
 use korado531m7\InventoryMenuAPI\event\InventoryCloseEvent;
 use korado531m7\InventoryMenuAPI\utils\InventoryMenuUtils;
+use korado531m7\InventoryMenuAPI\inventory\VillagerInventory;
 
 use pocketmine\Player;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\item\ItemIds;
+use pocketmine\item\Item;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 
@@ -32,6 +34,10 @@ class EventListener implements Listener{
         if($tmpData === null) return;
         $inventory = $tmpData->getMenuInventory();
         switch(true){
+            case $pk instanceof ActorEventPacket:
+                $tmpData->setPage($pk->data);
+            break;
+            
             case $pk instanceof ContainerClosePacket:
                 $ev = new InventoryCloseEvent($player, $inventory, $pk->windowId);
                 $ev->call();
@@ -47,19 +53,30 @@ class EventListener implements Listener{
                 }
             break;
             
-            case $pk instanceof InventoryTransactionPacket && array_key_exists(0, $pk->actions):
+            case $pk instanceof InventoryTransactionPacket && isset($pk->actions[0]):
                 $action = $pk->actions[0];
                 if($inventory->isReadonly()){
                     $inventory->doClose($player);
                     $event->setCancelled();
                 }
-                $item = $action->oldItem->getId() === ItemIds::AIR ? $action->newItem : $action->oldItem;
+                $item = $action->oldItem->getId() === Item::AIR ? $action->newItem : $action->oldItem;
                 $callable = $inventory->getCallable($inventory::CALLBACK_CLICKED);
                 if($callable !== null){
                     call_user_func_array($callable, [$player, $inventory, $item]);
                 }
                 $ev = new InventoryClickEvent($player, $item, $pk, $inventory);
                 $ev->call();
+                if($inventory instanceof VillagerInventory){
+                    if($tmpData->getPage() !== null){
+                        $recipe = $inventory->getRecipes()[$tmpData->getPage()];
+                        $player->getInventory()->addItem($recipe->getResult());
+                        $player->getInventory()->removeItem($recipe->getIngredient());
+                        $ig2 = $recipe->getIngredient2();
+                        if($ig2 instanceof Item){
+                            $player->getInventory()->removeItem($ig2);
+                        }
+                    }
+                }
             break;
         }
     }

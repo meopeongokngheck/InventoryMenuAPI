@@ -6,9 +6,18 @@ use korado531m7\InventoryMenuAPI\inventory\MenuInventory;
 class TemporaryData{
     private $instance;
     private $items = [];
+    private $tradepage = null;
     
     public function __construct(){
         
+    }
+    
+    public function setPage(int $page){
+        $this->tradepage = $page;
+    }
+    
+    public function getPage() : ?int{
+        return $this->tradepage;
     }
     
     public function setItems(array $items){

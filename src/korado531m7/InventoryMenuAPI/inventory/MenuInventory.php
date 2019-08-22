@@ -168,7 +168,8 @@ abstract class MenuInventory extends ContainerInventory implements WindowTypes{
         }
         $player->removeWindow($inventory);
         InventoryMenuUtils::removeBlock($player, $inventory->getPosition(), $inventory->isDouble());
-        $player->getInventory()->setContents($tmpData->getItems());
+        if($this->isReadonly())
+            $player->getInventory()->setContents($tmpData->getItems());
         InventoryMenu::unsetData($player);
     }
 }

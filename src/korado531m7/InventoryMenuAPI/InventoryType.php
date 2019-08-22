@@ -9,7 +9,9 @@ use korado531m7\InventoryMenuAPI\inventory\{AnvilInventory,
                                             DoubleChestInventory,
                                             DropperInventory,
                                             EnchantingTableInventory,
-                                            HopperInventory};
+                                            HopperInventory,
+                                            VillagerInventory
+                                            };
 
 interface InventoryType{
     const INVENTORY_TYPE_ANVIL = AnvilInventory::class;
@@ -21,4 +23,5 @@ interface InventoryType{
     const INVENTORY_TYPE_DROPPER = DropperInventory::class;
     const INVENTORY_TYPE_ENCHANTING_TABLE = EnchantingTableInventory::class;
     const INVENTORY_TYPE_HOPPER = HopperInventory::class;
+    const INVENTORY_TYPE_VILLAGER = VillagerInventory::class;
 }

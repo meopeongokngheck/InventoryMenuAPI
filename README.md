@@ -72,6 +72,7 @@ const INVENTORY_TYPE_DOUBLE_CHEST = DoubleChestInventory::class;
 const INVENTORY_TYPE_DROPPER = DropperInventory::class;
 const INVENTORY_TYPE_ENCHANTING_TABLE = EnchantingTableInventory::class;
 const INVENTORY_TYPE_HOPPER = HopperInventory::class;
+const INVENTORY_TYPE_VILLAGER = VillagerInventory::class;
 ```
 
 ```php
@@ -151,6 +152,28 @@ to set task, use setTask()
 ```php
 $inv->setTask($task); //$task must be korado531m7\InventoryMenuAPI\task\Task
 ```
+
+___
+**SET RECIPE TO VILLAGER INVENTORY**
+Since 3.2.0, you can create villager inventory and set recipe to it.
+To make recipe, create TradingRecipe instance and set ingredients to that, then set it to villager inventory with addRecipe().
+Here's example:
+```php
+
+//use korado531m7\InventoryMenuAPI\inventory\VillagerInventory;
+$villagerInventory = new VillagerInventory();
+
+//use korado531m7\InventoryMenuAPI\utils\TradingRecipe;
+$recipe = new TradingRecipe();
+$recipe->setIngredient(Item::get(Item::DIAMOND));     //at least you must set an ingredient
+//$recipe->setIngredient2(Item::get(Item::TRIDENT)); to set two ingredients, use setIngredient2() function
+$recipe->setResult(Item::get(Item::ENDER_EYE));       //result item can trade from ingredient
+
+$villagerInventory->addRecipe($recipe); //add recipe to villager inventory
+$villagerInventory->send($player); //send to player
+```
+NOTE: VillagerInventory doesn't support setTask
+___
 
 ___
 
