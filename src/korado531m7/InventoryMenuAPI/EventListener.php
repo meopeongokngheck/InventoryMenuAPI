@@ -34,7 +34,7 @@ class EventListener implements Listener{
         if($tmpData === null) return;
         $inventory = $tmpData->getMenuInventory();
         switch(true){
-            case $pk instanceof ActorEventPacket:
+            case $pk instanceof ActorEventPacket && $pk->event === ActorEventPacket::COMPLETE_TRADE:
                 $tmpData->setPage($pk->data);
             break;
             
