@@ -154,12 +154,13 @@ $inv->setTask($task); //$task must be korado531m7\InventoryMenuAPI\task\Task
 ```
 
 ___
+
 **SET RECIPE TO VILLAGER INVENTORY**
+
 Since 3.2.0, you can create villager inventory and set recipe to it.
 To make recipe, create TradingRecipe instance and set ingredients to that, then set it to villager inventory with addRecipe().
 Here's example:
 ```php
-
 //use korado531m7\InventoryMenuAPI\inventory\VillagerInventory;
 $villagerInventory = new VillagerInventory();
 
@@ -173,7 +174,6 @@ $villagerInventory->addRecipe($recipe); //add recipe to villager inventory
 $villagerInventory->send($player); //send to player
 ```
 NOTE: VillagerInventory doesn't support setTask
-___
 
 ___
 
